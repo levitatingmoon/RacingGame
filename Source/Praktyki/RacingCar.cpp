@@ -26,11 +26,31 @@ void ARacingCar::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
+    FVector ForwardVector = CarSkeletalMesh->GetForwardVector();
+    FVector RightVector = CarSkeletalMesh->GetRightVector();
+
+    float SidewaysSpeed = FVector::DotProduct(Velocity, RightVector);
+    FVector SidewaysFrictionForce = -RightVector * SidewaysSpeed * SidewaysFrictionStrength;
+    CarSkeletalMesh->AddForce(SidewaysFrictionForce);
+
+    float ForwardSpeed = FVector::DotProduct(Velocity, ForwardVector);
+    if (ThrottleInput.IsNearlyZero())
+    {
+        FVector ForwardResistance = -ForwardVector * ForwardSpeed * ForwardFrictionStrength;
+        CarSkeletalMesh->AddForce(ForwardResistance);
+    }
+
     if (!ThrottleInput.IsNearlyZero())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Applying force: %f"), ThrottleInput.X * MoveForce);
-        FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce;
+        float Speed = CarSkeletalMesh->GetComponentVelocity().Size();
+        float SpeedRatio = FMath::Clamp(Speed / MaxSpeed, 0.f, 1.f);
+        float ForceScale = 1.f - SpeedRatio;
+
+        FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale;
         CarSkeletalMesh->AddForce(Force);
+
+        UE_LOG(LogTemp, Warning, TEXT("Speed: %.1f, Force scale: %.2f"), Speed, ForceScale);
     }
 
     if (FMath::Abs(SteerInput) > 0.1f)

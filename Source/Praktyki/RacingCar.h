@@ -27,7 +27,6 @@ public:
     FVector2D ThrottleInput;
     float SteerInput;
 
-    // Movement parameters
     USkeletalMeshComponent* CarSkeletalMesh;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
@@ -36,7 +35,15 @@ public:
     UPROPERTY(EditAnywhere, Category = "Physics")
     float TurnTorque = 500000.f;
 
-    // Visual rotation tracking
+    UPROPERTY(EditAnywhere, Category = "Physics")
+    float MaxSpeed = 3000.f;
+
+    UPROPERTY(EditAnywhere, Category = "Physics")
+    float SidewaysFrictionStrength = 800.f;
+
+    UPROPERTY(EditAnywhere, Category = "Physics")
+    float ForwardFrictionStrength = 300.f;
+
     UPROPERTY(VisibleAnywhere, Category = "Visuals")
     float SteeringAngle;
 
