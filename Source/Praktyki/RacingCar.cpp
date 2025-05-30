@@ -33,6 +33,10 @@ void ARacingCar::BeginPlay()
     GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
     NumberOfSectors = GameMode->SectorNumber;
 
+    CurrentSectorTimes.SetNum(NumberOfSectors);
+    BestSectorTimes.SetNum(NumberOfSectors);
+    bSectorsStarted.SetNum(NumberOfSectors);
+
     APlayerController* PC = Cast<APlayerController>(GetController());
     if (PC && RaceWidgetClass)
     {
@@ -42,6 +46,8 @@ void ARacingCar::BeginPlay()
             RaceWidget->AddToViewport();
         }
     }
+
+    RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
 
 }
 
@@ -174,26 +180,35 @@ void ARacingCar::StartCar()
     bIsStopped = false;
 }
 
-void ARacingCar::StoreCheckpointTime(int SectorNumber, float QualiTime)
+void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
 {
     if (SectorNumber == 0)
     {
-        PreviousLapTime = QualiTime - StartLapTime;
-        StartLapTime = QualiTime;
-        SectorStartTime = QualiTime;
-
-        if (PreviousLapTime < BestLapTime)
+        //Start of Race
+        if (PreviousSectorNumber == 0)
         {
-            BestLapTime = PreviousLapTime;
-            RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestLapTime, true)));
+            StartLapTime = TimerTime;
+            SectorStartTime = TimerTime;
         }
-
-        LapTimes.Add(PreviousLapTime);
-
-        if (bPassedAllSectors)
+        //End of Lap
+        else if (PreviousSectorNumber == NumberOfSectors - 1)
         {
+            PreviousLapTime = TimerTime - StartLapTime;
+            StartLapTime = TimerTime;
+            SectorStartTime = TimerTime;
+
+            if (PreviousLapTime < BestLapTime || StartedLaps == 1)
+            {
+                BestLapTime = PreviousLapTime;
+                RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestLapTime, true)));
+            }
+
+            LapTimes.Add(PreviousLapTime);
+
             StartedLaps += 1;
-            RaceWidget->Laps->SetText(FText::FromString(FString::FromInt(StartedLaps)));
+            RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
+
+            PreviousSectorNumber = SectorNumber;
         }
 
     }
@@ -201,17 +216,15 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float QualiTime)
     {
         FString Msg = FString::Printf(TEXT("QUALI TIME: %.2f"), CurrentSectorTimes.Num());
         GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
-        if (CurrentSectorTimes.Num() < SectorNumber + 1)
-        {
-            CurrentSectorTimes.Add(QualiTime - SectorStartTime);
-        }
-        else
-        {
-            CurrentSectorTimes[SectorNumber-1] = QualiTime - SectorStartTime;
-        }
 
-        SectorStartTime = QualiTime;
+        CurrentSectorTimes[SectorNumber-1] = TimerTime - SectorStartTime;
 
+        SectorStartTime = TimerTime;
+
+        if (PreviousSectorNumber == SectorNumber - 1)
+        {
+            PreviousSectorNumber = SectorNumber;
+        }
     }
 
 }

@@ -46,7 +46,7 @@ public:
 
     TArray<float> CurrentSectorTimes;
     TArray<float> BestSectorTimes;
-    TArray<bool> bSectorsDone;
+    TArray<bool> bSectorsStarted;
     TArray<float> LapTimes;
 
     int NumberOfSectors = 0;
@@ -56,7 +56,9 @@ public:
     float StartLapTime;
     float SectorStartTime;
 
-    int StartedLaps = 0;
+    int PreviousSectorNumber = 0;
+
+    int StartedLaps = 1;
 
     bool bPassedAllSectors = false;
 
