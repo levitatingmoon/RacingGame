@@ -2,6 +2,8 @@
 
 
 #include "TimingLine.h"
+#include "PraktykiGameModeBase.h"
+#include "RacingCar.h"
 
 // Sets default values
 ATimingLine::ATimingLine()
@@ -32,13 +34,13 @@ void ATimingLine::Tick(float DeltaTime)
 void ATimingLine::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//FString Msg = FString::Printf(TEXT("OVERLAP"));
-	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+	FString Msg = FString::Printf(TEXT("OVERLAP"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
 	ARacingCar* RacingCar = Cast<ARacingCar>(OtherActor);
 	if (RacingCar)
 	{
-		//Msg = FString::Printf(TEXT("QUALI TIME: %.2f"), GameMode->QualiTime);
-		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+		Msg = FString::Printf(TEXT("QUALI TIME: %.2f"), GameMode->QualiTime);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
 		RacingCar->StoreCheckpointTime(SectorNumber, GameMode->QualiTime);
 	}
 }
