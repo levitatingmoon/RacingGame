@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "RacingCarMovementComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "RacingCar.generated.h"
 
@@ -17,12 +18,33 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+private:
+
 public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     void Throttle(float Val);
     void Steer(float Val);
+
+    void UseBehindCamera();
+    void UseInsideCamera();
+    void UseHoodCamera();
+
+    UCameraComponent* FindCameraByName(FName CameraName);
+
+    void StopCar();
+
+    void StoreCheckpointTime(int SectorNumber, float QualiTime);
+
+    TArray<float> CurrentSectorTimes;
+    TArray<float> BestSectorTimes;
+    TArray<float> LapTimes;
+
+    float PreviousLapTime;
+    float BestLapTime;
+    float StartLapTime;
+    float SectorStartTime;
 
     FVector2D ThrottleInput;
     float SteerInput;
@@ -44,6 +66,12 @@ public:
     UPROPERTY(EditAnywhere, Category = "Physics")
     float ForwardFrictionStrength = 300.f;
 
+    UPROPERTY(EditAnywhere, Category = "Physics")
+    float SteeringGripStrength = 25000.f;
+
+    UPROPERTY(EditAnywhere, Category = "Physics")
+    float MaxSteeringAngle = 0.4f;
+
     UPROPERTY(VisibleAnywhere, Category = "Visuals")
     float SteeringAngle;
 
@@ -51,14 +79,20 @@ public:
     float WheelSpinAngle;
 
     UPROPERTY(EditAnywhere, Category = "Visuals")
-    float MaxSteeringAngle = 30.f;
-
-    UPROPERTY(EditAnywhere, Category = "Visuals")
     float WheelSpinSpeed = 500.f;
+
+    UCameraComponent* BehindCamera;
+    UCameraComponent* InsideCamera;
+    UCameraComponent* HoodCamera;
 
     //UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     //URacingCarMovementComponent* MovementComponent;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
+    UStaticMesh* Wheel_FL;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
+    UStaticMesh* Wheel_FR;
 
+    bool bIsStopped = false;
 };

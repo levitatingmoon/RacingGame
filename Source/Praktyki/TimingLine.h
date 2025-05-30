@@ -1,0 +1,43 @@
+// Copyright 2025 Teyon. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "RacingCar.h"
+#include "PraktykiGameModeBase.h"
+#include "Components/BoxComponent.h"
+#include "TimingLine.generated.h"
+
+UCLASS()
+class PRAKTYKI_API ATimingLine : public AActor
+{
+	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	ATimingLine();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Line")
+	bool bIsStartLine = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Line")
+	int SectorNumber = 0;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* Root;
+
+	APraktykiGameModeBase* GameMode;
+
+};
