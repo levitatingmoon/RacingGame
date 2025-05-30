@@ -2,10 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "RacingCarMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "RacingCar.generated.h"
+
+class APraktykiGameModeBase;
+class URaceWidget;
+class ARacingCarMovementComponent;
 
 UCLASS()
 class PRAKTYKI_API ARacingCar : public APawn
@@ -35,16 +38,27 @@ public:
 
     void StopCar();
 
+    void StartCar();
+
     void StoreCheckpointTime(int SectorNumber, float QualiTime);
+
+    FString FormatTime(float TimeSeconds, bool bMilliseconds);
 
     TArray<float> CurrentSectorTimes;
     TArray<float> BestSectorTimes;
+    TArray<bool> bSectorsDone;
     TArray<float> LapTimes;
+
+    int NumberOfSectors = 0;
 
     float PreviousLapTime;
     float BestLapTime;
     float StartLapTime;
     float SectorStartTime;
+
+    int StartedLaps = 0;
+
+    bool bPassedAllSectors = false;
 
     FVector2D ThrottleInput;
     float SteerInput;
@@ -95,4 +109,12 @@ public:
     UStaticMesh* Wheel_FR;
 
     bool bIsStopped = false;
+
+    URaceWidget* RaceWidget;
+
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<URaceWidget> RaceWidgetClass;
+
+    APraktykiGameModeBase* GameMode;
+
 };

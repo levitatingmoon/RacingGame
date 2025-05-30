@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "RacingCar.h"
-#include "PraktykiGameModeBase.h"
 #include "Components/BoxComponent.h"
 #include "TimingLine.generated.h"
+
+class APraktykiGameModeBase;
+class ARacingCar;
 
 UCLASS()
 class PRAKTYKI_API ATimingLine : public AActor
@@ -34,7 +35,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Line")
 	int SectorNumber = 0;
-
+	 
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* Root;
 

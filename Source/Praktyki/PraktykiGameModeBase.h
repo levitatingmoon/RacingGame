@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "RacingCar.h"
 #include "PraktykiGameModeBase.generated.h"
 
+class ARacingCar;
+class ATimingLine;
 /**
  * 
  */
@@ -30,9 +31,12 @@ public:
     int LapLimit = 30;
     int CurrentLap = 1;
     bool bRaceOver = false;
+    float RaceTime = 0.f;
 
     bool bIsQuali = false;
     bool bIsRace = false;
+
+    int NrOfSectors = 0;
 
     void QualiStart();
     void QualiEnd();
@@ -41,5 +45,7 @@ public:
     void RaceEnd();
 
     FTimerHandle TimerHandleTimeToStart;
+
+    int SectorNumber = 0;
 	 
 };

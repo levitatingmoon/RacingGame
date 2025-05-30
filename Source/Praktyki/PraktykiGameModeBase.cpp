@@ -2,6 +2,9 @@
 
 
 #include "PraktykiGameModeBase.h"
+#include "RacingCar.h"
+#include "TimingLine.h"
+#include <Kismet/GameplayStatics.h>
 
 APraktykiGameModeBase::APraktykiGameModeBase()
 {
@@ -18,6 +21,14 @@ void APraktykiGameModeBase::BeginPlay()
     UE_LOG(LogTemp, Warning, TEXT("Race Starts: %.2f"), QualiTime);
 
     GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::QualiStart, 3.0f, false);
+
+    TArray<AActor*> AllTimingLines;
+    if (GetWorld())
+    {
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATimingLine::StaticClass(), AllTimingLines);
+    }
+
+    SectorNumber = AllTimingLines.Num();
 }
 
 void APraktykiGameModeBase::QualiStart()
@@ -35,6 +46,12 @@ void APraktykiGameModeBase::RaceStart()
 {
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("RACE START"));
     bIsRace = true;
+    ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    if (Car)
+    {
+        Car->StartCar();
+    }
+    QualiTime = 0.0f;
 }
 
 void APraktykiGameModeBase::RaceEnd()
@@ -67,6 +84,6 @@ void APraktykiGameModeBase::Tick(float DeltaSeconds)
     }
     else if (bIsRace)
     {
-        
+        QualiTime += DeltaSeconds;
     }
 }

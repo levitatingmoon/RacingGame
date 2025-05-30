@@ -1,4 +1,7 @@
 #include "RacingCar.h"
+#include "PraktykiGameModeBase.h"
+#include "RacingCarMovementComponent.h"
+#include "RaceWidget.h"
 
 ARacingCar::ARacingCar()
 {
@@ -27,43 +30,65 @@ void ARacingCar::BeginPlay()
     FVector CenterOfMassOffset = FVector(0.f, 0.f, -200.f);
     CarSkeletalMesh->SetCenterOfMass(CenterOfMassOffset);
 
+    GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
+    NumberOfSectors = GameMode->SectorNumber;
+
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (PC && RaceWidgetClass)
+    {
+        RaceWidget = CreateWidget<URaceWidget>(PC, RaceWidgetClass);
+        if (RaceWidget)
+        {
+            RaceWidget->AddToViewport();
+        }
+    }
+
 }
 
 void ARacingCar::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
-    FVector ForwardVector = CarSkeletalMesh->GetForwardVector();
-    FVector RightVector = CarSkeletalMesh->GetRightVector();
-
-    float SidewaysSpeed = FVector::DotProduct(Velocity, RightVector);
-    FVector SidewaysFrictionForce = -RightVector * SidewaysSpeed * SidewaysFrictionStrength;
-    CarSkeletalMesh->AddForce(SidewaysFrictionForce);
-
-    float ForwardSpeed = FVector::DotProduct(Velocity, ForwardVector);
-    if (ThrottleInput.IsNearlyZero())
+    if (GameMode)
     {
-        FVector ForwardResistance = -ForwardVector * ForwardSpeed * ForwardFrictionStrength;
-        CarSkeletalMesh->AddForce(ForwardResistance);
+        RaceWidget->Timer->SetText(FText::FromString(FormatTime(GameMode->QualiTime, false)));
+        // Update widget text
     }
 
-    if (!ThrottleInput.IsNearlyZero())
+    if (!bIsStopped)
     {
-        float Speed = CarSkeletalMesh->GetComponentVelocity().Size();
-        float SpeedRatio = FMath::Clamp(Speed / MaxSpeed, 0.f, 1.f);
-        float ForceScale = 1.f - SpeedRatio;
+        FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
+        FVector ForwardVector = CarSkeletalMesh->GetForwardVector();
+        FVector RightVector = CarSkeletalMesh->GetRightVector();
 
-        FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale;
-        CarSkeletalMesh->AddForce(Force);
+        float SidewaysSpeed = FVector::DotProduct(Velocity, RightVector);
+        FVector SidewaysFrictionForce = -RightVector * SidewaysSpeed * SidewaysFrictionStrength;
+        CarSkeletalMesh->AddForce(SidewaysFrictionForce);
 
-        UE_LOG(LogTemp, Warning, TEXT("Speed: %.1f, Force scale: %.2f"), Speed, ForceScale);
-    }
+        float ForwardSpeed = FVector::DotProduct(Velocity, ForwardVector);
+        if (ThrottleInput.IsNearlyZero())
+        {
+            FVector ForwardResistance = -ForwardVector * ForwardSpeed * ForwardFrictionStrength;
+            CarSkeletalMesh->AddForce(ForwardResistance);
+        }
 
-    if (FMath::Abs(SteerInput) > 0.01f)
-    {
-        FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
-        CarSkeletalMesh->AddTorqueInRadians(Torque);
+        if (!ThrottleInput.IsNearlyZero())
+        {
+            float Speed = CarSkeletalMesh->GetComponentVelocity().Size();
+            float SpeedRatio = FMath::Clamp(Speed / MaxSpeed, 0.f, 1.f);
+            float ForceScale = 1.f - SpeedRatio;
+
+            FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale;
+            CarSkeletalMesh->AddForce(Force);
+
+            UE_LOG(LogTemp, Warning, TEXT("Speed: %.1f, Force scale: %.2f"), Speed, ForceScale);
+        }
+
+        if (FMath::Abs(SteerInput) > 0.01f)
+        {
+            FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
+            CarSkeletalMesh->AddTorqueInRadians(Torque);
+        }
     }
 }
 
@@ -80,14 +105,22 @@ void ARacingCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void ARacingCar::Throttle(float Val)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Throttle input: %f"), Val);
-    ThrottleInput.X = FMath::Clamp(Val, -1.f, 1.f);
+    if (!bIsStopped)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Throttle input: %f"), Val);
+        ThrottleInput.X = FMath::Clamp(Val, -1.f, 1.f);
+    }
+
 }
 
 void ARacingCar::Steer(float Val)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Steer input: %f"), Val);
-    SteerInput = FMath::Clamp(Val, -1.f, 1.f);
+    if (!bIsStopped)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Steer input: %f"), Val);
+        SteerInput = FMath::Clamp(Val, -1.f, 1.f);
+    }
+
 }
 
 void ARacingCar::UseBehindCamera()
@@ -136,6 +169,11 @@ void ARacingCar::StopCar()
     UE_LOG(LogTemp, Warning, TEXT("StoppedCar"));
 }
 
+void ARacingCar::StartCar()
+{
+    bIsStopped = false;
+}
+
 void ARacingCar::StoreCheckpointTime(int SectorNumber, float QualiTime)
 {
     if (SectorNumber == 0)
@@ -144,13 +182,50 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float QualiTime)
         StartLapTime = QualiTime;
         SectorStartTime = QualiTime;
 
-        if (PreviousLapTime < BestLapTime) BestLapTime = PreviousLapTime;
+        if (PreviousLapTime < BestLapTime)
+        {
+            BestLapTime = PreviousLapTime;
+            RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestLapTime, true)));
+        }
+
+        LapTimes.Add(PreviousLapTime);
+
+        if (bPassedAllSectors)
+        {
+            StartedLaps += 1;
+            RaceWidget->Laps->SetText(FText::FromString(FString::FromInt(StartedLaps)));
+        }
 
     }
     else 
     {
-        CurrentSectorTimes[SectorNumber] = QualiTime - SectorStartTime;
+        FString Msg = FString::Printf(TEXT("QUALI TIME: %.2f"), CurrentSectorTimes.Num());
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+        if (CurrentSectorTimes.Num() < SectorNumber + 1)
+        {
+            CurrentSectorTimes.Add(QualiTime - SectorStartTime);
+        }
+        else
+        {
+            CurrentSectorTimes[SectorNumber-1] = QualiTime - SectorStartTime;
+        }
+
         SectorStartTime = QualiTime;
 
     }
+
+}
+
+FString ARacingCar::FormatTime(float TimeSeconds, bool bMilliseconds)
+{
+    int32 TotalMilliseconds = FMath::RoundToInt(TimeSeconds * 1000.0f);
+    int32 Minutes = TotalMilliseconds / 60000;
+    int32 Seconds = (TotalMilliseconds % 60000) / 1000;
+    if (bMilliseconds) 
+    {
+        int32 Milliseconds = TotalMilliseconds % 1000;
+        return FString::Printf(TEXT("%02d:%02d:%03d"), Minutes, Seconds, Milliseconds);
+    }
+
+    return FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
 }
