@@ -5,27 +5,28 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/TextBlock.h"
-#include "RaceWidget.generated.h"
+#include "EndRaceWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PRAKTYKI_API URaceWidget : public UUserWidget
+class PRAKTYKI_API UEndRaceWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* Timer;
+	UTextBlock* BestTime;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* Laps;
+	UTextBlock* RaceTime;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* BestLap;
+	UTextBlock* FastestLap;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* SectorTimer;
+	UTextBlock* Penalties;
+	
 };
