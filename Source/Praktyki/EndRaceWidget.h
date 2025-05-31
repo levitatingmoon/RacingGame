@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
 #include "EndRaceWidget.generated.h"
 
+class UTextBlock;
 /**
  * 
  */

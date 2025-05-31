@@ -45,6 +45,9 @@ public:
     void StoreCheckpointTime(int SectorNumber, float QualiTime);
 
     void GetEndRaceStatistics();
+    void StartRaceCountdown();
+    void LightOn(int LightIndex);
+    void LightsOut();
 
     TArray<float> CurrentSectorTimes;
     TArray<float> BestSectorTimes;
@@ -104,12 +107,6 @@ public:
 
     //UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     //URacingCarMovementComponent* MovementComponent;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
-    UStaticMesh* Wheel_FL;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Visuals")
-    UStaticMesh* Wheel_FR;
 
     bool bIsStopped = false;
 

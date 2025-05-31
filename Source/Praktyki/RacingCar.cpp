@@ -298,6 +298,37 @@ void ARacingCar::GetEndRaceStatistics()
   
 }
 
+void ARacingCar::StartRaceCountdown()
+{
+    RaceWidget->SetVisibility(ESlateVisibility::Hidden);
+
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (PC && StartRaceWidgetClass)
+    {
+        StartRaceWidget = CreateWidget<UStartRaceWidget>(PC, StartRaceWidgetClass);
+        if (StartRaceWidget)
+        {
+            StartRaceWidget->AddToViewport();
+        }
+    }
+}
+
+void ARacingCar::LightOn(int LightIndex)
+{
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("LIGHT ON"));
+    StartRaceWidget->SetLightColour(LightIndex, FLinearColor::Red);
+}
+
+void ARacingCar::LightsOut()
+{
+    //StartRaceWidget->SetLightColour(0, FLinearColor::Black);
+    //StartRaceWidget->SetLightColour(1, FLinearColor::Black);
+    //StartRaceWidget->SetLightColour(2, FLinearColor::Black);
+    //StartRaceWidget->SetLightColour(3, FLinearColor::Black);
+    //StartRaceWidget->SetLightColour(4, FLinearColor::Black);
+
+}
+
 FString ARacingCar::FormatTime(float TimeSeconds, bool bMilliseconds)
 {
     int32 TotalMilliseconds = FMath::RoundToInt(TimeSeconds * 1000.0f);

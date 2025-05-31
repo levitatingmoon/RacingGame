@@ -44,8 +44,11 @@ void APraktykiGameModeBase::QualiEnd()
     if (Car)
     {
         Car->PrepareForRace();
+        Car->StartRaceCountdown();
     }
-    GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::RaceStart, 3.0f, false);
+
+    CurrentLight = 0;
+    GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::LightSequence, 3.0f, false);
 }
 
 void APraktykiGameModeBase::RaceStart()
@@ -61,6 +64,36 @@ void APraktykiGameModeBase::RaceStart()
 
 void APraktykiGameModeBase::RaceEnd()
 {
+}
+
+void APraktykiGameModeBase::LightsOut()
+{
+    ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    if (Car)
+    {
+        Car->LightOn(CurrentLight);
+    }
+    RaceStart();
+}
+
+void APraktykiGameModeBase::LightSequence()
+{
+    ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    if (Car)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("LIGHT SEQUENCE"));
+        Car->LightOn(CurrentLight);
+        CurrentLight++;
+        if (CurrentLight < LightsNumber)
+        {
+            GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::LightSequence, 1.0f, false);
+        }
+        else
+        {
+            float RandomDelay = FMath::FRandRange(0.2f, 1.5f);
+            GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::LightsOut, RandomDelay, false);
+        }
+    }
 }
 
 void APraktykiGameModeBase::Tick(float DeltaSeconds)

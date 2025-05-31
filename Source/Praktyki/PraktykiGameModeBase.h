@@ -38,11 +38,18 @@ public:
 
     int NrOfSectors = 0;
 
+    int CurrentLight = 0;
+    int LightsNumber = 5;
+
     void QualiStart();
     void QualiEnd();
 
     void RaceStart();
     void RaceEnd();
+
+    void LightsOut();
+
+    void LightSequence();
 
     FTimerHandle TimerHandleTimeToStart;
 
