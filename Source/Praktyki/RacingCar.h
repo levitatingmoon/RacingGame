@@ -8,6 +8,8 @@
 
 class APraktykiGameModeBase;
 class URaceWidget;
+class UEndRaceWidget;
+class UStartRaceWidget;
 class ARacingCarMovementComponent;
 
 UCLASS()
@@ -27,40 +29,39 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+    FString FormatTime(float TimeSeconds, bool bMilliseconds);
+
     void Throttle(float Val);
     void Steer(float Val);
+    void StopCar();
+    void StartCar();
+    void PrepareForRace();
 
     void UseBehindCamera();
     void UseInsideCamera();
     void UseHoodCamera();
-
     UCameraComponent* FindCameraByName(FName CameraName);
-
-    void StopCar();
-
-    void StartCar();
 
     void StoreCheckpointTime(int SectorNumber, float QualiTime);
 
-    FString FormatTime(float TimeSeconds, bool bMilliseconds);
+    void GetEndRaceStatistics();
 
     TArray<float> CurrentSectorTimes;
     TArray<float> BestSectorTimes;
-    TArray<bool> bSectorsStarted;
     TArray<float> LapTimes;
 
     int NumberOfSectors = 0;
-
     float PreviousLapTime;
-    float BestLapTime;
+    float BestRaceLap;
+    float BestQualiLap;
     float StartLapTime;
     float SectorStartTime;
-
+    float RaceTime;
+    float Penalty;
     int PreviousSectorNumber = 0;
-
     int StartedLaps = 1;
-
-    bool bPassedAllSectors = false;
+    bool bRaceEnded = false;
+    bool bStartedFirstLap = false;
 
     FVector2D ThrottleInput;
     float SteerInput;
@@ -112,10 +113,21 @@ public:
 
     bool bIsStopped = false;
 
+    UPROPERTY()
     URaceWidget* RaceWidget;
+    UPROPERTY()
+    UStartRaceWidget* StartRaceWidget;
+    UPROPERTY()
+    UEndRaceWidget* EndRaceWidget;
 
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<URaceWidget> RaceWidgetClass;
+
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UStartRaceWidget> StartRaceWidgetClass;
+
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UEndRaceWidget> EndRaceWidgetClass;
 
     APraktykiGameModeBase* GameMode;
 

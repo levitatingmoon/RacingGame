@@ -39,7 +39,7 @@ void ATimingLine::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	ARacingCar* RacingCar = Cast<ARacingCar>(OtherActor);
 	if (RacingCar)
 	{
-		Msg = FString::Printf(TEXT("QUALI TIME: %.2f"), GameMode->QualiTime);
+		Msg = FString::Printf(TEXT("SECTOR TIME: %.2f"), GameMode->QualiTime);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
 		RacingCar->StoreCheckpointTime(SectorNumber, GameMode->QualiTime);
 	}

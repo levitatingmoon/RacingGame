@@ -2,6 +2,8 @@
 #include "PraktykiGameModeBase.h"
 #include "RacingCarMovementComponent.h"
 #include "RaceWidget.h"
+#include "EndRaceWidget.h"
+#include "StartRaceWidget.h"
 
 ARacingCar::ARacingCar()
 {
@@ -35,7 +37,6 @@ void ARacingCar::BeginPlay()
 
     CurrentSectorTimes.SetNum(NumberOfSectors);
     BestSectorTimes.SetNum(NumberOfSectors);
-    bSectorsStarted.SetNum(NumberOfSectors);
 
     APlayerController* PC = Cast<APlayerController>(GetController());
     if (PC && RaceWidgetClass)
@@ -44,10 +45,17 @@ void ARacingCar::BeginPlay()
         if (RaceWidget)
         {
             RaceWidget->AddToViewport();
+            RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
         }
     }
 
-    RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
+
+    if (PC && StartRaceWidgetClass)
+    {
+        FString Msg = FString::Printf(TEXT("START RACE CLASS"));
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+        StartRaceWidget = CreateWidget<UStartRaceWidget>(PC, StartRaceWidgetClass);
+    }
 
 }
 
@@ -58,7 +66,11 @@ void ARacingCar::Tick(float DeltaTime)
     if (GameMode)
     {
         RaceWidget->Timer->SetText(FText::FromString(FormatTime(GameMode->QualiTime, false)));
-        // Update widget text
+        if (bStartedFirstLap)
+        {
+            RaceWidget->SectorTimer->SetText(FText::FromString(FormatTime(GameMode->QualiTime - SectorStartTime, false)));
+        }
+
     }
 
     if (!bIsStopped)
@@ -180,6 +192,16 @@ void ARacingCar::StartCar()
     bIsStopped = false;
 }
 
+void ARacingCar::PrepareForRace()
+{
+    StartedLaps = 1;
+    SectorStartTime = 0;
+    PreviousSectorNumber = 0;
+    PreviousLapTime = 0;
+
+    SetActorLocation(FVector(-2000.f, 0.f, 200.f), false, nullptr, ETeleportType::TeleportPhysics);
+}
+
 void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
 {
     if (SectorNumber == 0)
@@ -189,6 +211,7 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
         {
             StartLapTime = TimerTime;
             SectorStartTime = TimerTime;
+            bStartedFirstLap = true;
         }
         //End of Lap
         else if (PreviousSectorNumber == NumberOfSectors - 1)
@@ -197,16 +220,32 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
             StartLapTime = TimerTime;
             SectorStartTime = TimerTime;
 
-            if (PreviousLapTime < BestLapTime || StartedLaps == 1)
+            if (GameMode->bIsRace)
             {
-                BestLapTime = PreviousLapTime;
-                RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestLapTime, true)));
+                if (PreviousLapTime < BestRaceLap || StartedLaps == 1)
+                {
+                    BestRaceLap = PreviousLapTime;
+                    RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestRaceLap, true)));
+                }
+
+                //LapTimes.Add(PreviousLapTime);
+
+                StartedLaps += 1;
+                RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
             }
+            else if (GameMode->bIsQuali)
+            {
+                if(PreviousLapTime < BestQualiLap || StartedLaps == 1)
+                {
+                    BestQualiLap = PreviousLapTime;
+                    RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestQualiLap, true)));
+                }
 
-            LapTimes.Add(PreviousLapTime);
+                //LapTimes.Add(PreviousLapTime);
 
-            StartedLaps += 1;
-            RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
+                StartedLaps += 1;
+                RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d"), StartedLaps)));
+            }
 
             PreviousSectorNumber = SectorNumber;
         }
@@ -227,6 +266,36 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
         }
     }
 
+    if (StartedLaps > GameMode->LapLimit && !bRaceEnded && GameMode->bIsRace)
+    {
+        bRaceEnded = true;
+        StopCar();
+        GetEndRaceStatistics();
+    }
+
+}
+
+void ARacingCar::GetEndRaceStatistics()
+{
+    RaceWidget->RemoveFromParent();
+
+    APlayerController* PC = Cast<APlayerController>(GetController());
+    if (PC && EndRaceWidgetClass)
+    {
+        EndRaceWidget = CreateWidget<UEndRaceWidget>(PC, EndRaceWidgetClass);
+        if (EndRaceWidget)
+        {
+            EndRaceWidget->AddToViewport();
+            PC->bShowMouseCursor = true;
+
+            EndRaceWidget->BestTime->SetText(FText::FromString(FormatTime(BestQualiLap, true)));
+            EndRaceWidget->FastestLap->SetText(FText::FromString(FormatTime(BestRaceLap, true)));
+            EndRaceWidget->Penalties->SetText(FText::FromString(FormatTime(Penalty, true)));
+            EndRaceWidget->RaceTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime, true)));
+        }
+
+    }
+  
 }
 
 FString ARacingCar::FormatTime(float TimeSeconds, bool bMilliseconds)

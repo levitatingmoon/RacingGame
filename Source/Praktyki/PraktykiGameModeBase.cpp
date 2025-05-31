@@ -39,6 +39,12 @@ void APraktykiGameModeBase::QualiStart()
 
 void APraktykiGameModeBase::QualiEnd()
 {
+    ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    QualiTime = 0.0f;
+    if (Car)
+    {
+        Car->PrepareForRace();
+    }
     GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::RaceStart, 3.0f, false);
 }
 
@@ -51,7 +57,6 @@ void APraktykiGameModeBase::RaceStart()
     {
         Car->StartCar();
     }
-    QualiTime = 0.0f;
 }
 
 void APraktykiGameModeBase::RaceEnd()

@@ -28,7 +28,7 @@ public:
     float MaxQualiTime = 10.f;
     bool bQualiOver = false;
 
-    int LapLimit = 30;
+    int LapLimit = 1;
     int CurrentLap = 1;
     bool bRaceOver = false;
     float RaceTime = 0.f;
