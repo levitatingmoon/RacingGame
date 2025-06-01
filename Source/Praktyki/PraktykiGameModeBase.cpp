@@ -71,7 +71,7 @@ void APraktykiGameModeBase::LightsOut()
     ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
     if (Car)
     {
-        Car->LightOn(CurrentLight);
+        //Car->LightOn(CurrentLight);
     }
     RaceStart();
 }

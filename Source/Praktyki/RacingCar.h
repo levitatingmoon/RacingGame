@@ -25,11 +25,21 @@ protected:
 
 private:
 
+    TArray<FName> WheelBones = 
+    {
+        FName("wheel_front_right_spin"),
+        FName("wheel_front_left_spin"),
+        FName("wheel_back_right_spin"),
+        FName("wheel_back_left_spin")
+    };
+
 public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     FString FormatTime(float TimeSeconds, bool bMilliseconds);
+    
+    void SuspensionWheelForce();
 
     void Throttle(float Val);
     void Steer(float Val);
@@ -69,6 +79,7 @@ public:
     FVector2D ThrottleInput;
     float SteerInput;
 
+    UPROPERTY()
     USkeletalMeshComponent* CarSkeletalMesh;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
@@ -102,7 +113,9 @@ public:
     float WheelSpinSpeed = 500.f;
 
     UCameraComponent* BehindCamera;
+
     UCameraComponent* InsideCamera;
+
     UCameraComponent* HoodCamera;
 
     //UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -126,6 +139,10 @@ public:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UEndRaceWidget> EndRaceWidgetClass;
 
+    UPROPERTY()
     APraktykiGameModeBase* GameMode;
+
+    float SpringStrength = 8000.0f;
+    float SpringDamping = 2000.0f;
 
 };

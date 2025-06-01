@@ -75,6 +75,8 @@ void ARacingCar::Tick(float DeltaTime)
 
     if (!bIsStopped)
     {
+        SuspensionWheelForce();
+
         FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
         FVector ForwardVector = CarSkeletalMesh->GetForwardVector();
         FVector RightVector = CarSkeletalMesh->GetRightVector();
@@ -341,4 +343,39 @@ FString ARacingCar::FormatTime(float TimeSeconds, bool bMilliseconds)
     }
 
     return FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
+}
+
+void ARacingCar::SuspensionWheelForce()
+{
+    for (const FName& Bone : WheelBones)
+    {
+
+        //FString Msg = FString::Printf(TEXT("BONE"));
+        //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+        FVector Start = CarSkeletalMesh->GetBoneLocation(Bone);
+        FString Msg = FString::Printf(TEXT("BONE: %.2f"), Start.X);
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+        FVector End = Start - FVector(0, 0, 100);
+
+        FHitResult Hit;
+        FCollisionQueryParams TraceParams(FName(TEXT("SuspensionTrace")), true, this);
+        bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
+
+        if (bHit)
+        {
+            //Msg = FString::Printf(TEXT("HIT"));
+            //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+            FVector springDir = FVector::UpVector;
+            FVector tireWorldVel = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(Start);
+
+            float offset = 50.0f - Hit.Distance;
+
+            float vel = FVector::DotProduct(springDir, tireWorldVel);
+            float force = (offset * SpringStrength) - (vel * SpringDamping);
+            Msg = FString::Printf(TEXT("FORCE: %.2f"), force);
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+
+            CarSkeletalMesh->AddForceAtLocation(springDir * force, Start);
+        }
+    }
 }
