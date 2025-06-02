@@ -4,6 +4,7 @@
 #include "RaceWidget.h"
 #include "EndRaceWidget.h"
 #include "StartRaceWidget.h"
+#include "SurfaceTypes.h"
 
 ARacingCar::ARacingCar()
 {
@@ -77,6 +78,7 @@ void ARacingCar::Tick(float DeltaTime)
     {
         SuspensionWheelForce();
 
+        
         FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
         FVector ForwardVector = CarSkeletalMesh->GetForwardVector();
         FVector RightVector = CarSkeletalMesh->GetRightVector();
@@ -91,7 +93,7 @@ void ARacingCar::Tick(float DeltaTime)
             FVector ForwardResistance = -ForwardVector * ForwardSpeed * ForwardFrictionStrength;
             CarSkeletalMesh->AddForce(ForwardResistance);
         }
-
+        
         if (!ThrottleInput.IsNearlyZero())
         {
             float Speed = CarSkeletalMesh->GetComponentVelocity().Size();
@@ -104,11 +106,13 @@ void ARacingCar::Tick(float DeltaTime)
             UE_LOG(LogTemp, Warning, TEXT("Speed: %.1f, Force scale: %.2f"), Speed, ForceScale);
         }
 
+        
         if (FMath::Abs(SteerInput) > 0.01f)
         {
             FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
             CarSkeletalMesh->AddTorqueInRadians(Torque);
         }
+        
     }
 }
 
@@ -347,24 +351,41 @@ FString ARacingCar::FormatTime(float TimeSeconds, bool bMilliseconds)
 
 void ARacingCar::SuspensionWheelForce()
 {
+    int WheelsOffTrack = 0;
+    bool bIsOffTrack = false;
     for (const FName& Bone : WheelBones)
     {
 
-        //FString Msg = FString::Printf(TEXT("BONE"));
-        //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
-        FVector Start = CarSkeletalMesh->GetBoneLocation(Bone);
-        FString Msg = FString::Printf(TEXT("BONE: %.2f"), Start.X);
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+        FVector BoneLocation = CarSkeletalMesh->GetBoneLocation(Bone);
+        FRotator BoneRotation = CarSkeletalMesh->GetBoneQuaternion(Bone).Rotator();
+        FVector BoneRightVector = BoneRotation.RotateVector(FVector::RightVector);
+
+        float SideMultiplier = 1.0f;
+
+        if (Bone == WheelBones[1] || Bone == WheelBones[3])
+        {
+            SideMultiplier = -1.0f;
+        }
+
+        FVector SideOffset = BoneRightVector * 20.f * SideMultiplier;
+        FVector Start = BoneLocation + SideOffset;
         FVector End = Start - FVector(0, 0, 100);
 
         FHitResult Hit;
         FCollisionQueryParams TraceParams(FName(TEXT("SuspensionTrace")), true, this);
+        TraceParams.AddIgnoredActor(this);
+        TraceParams.bReturnPhysicalMaterial = true;
         bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams);
 
         if (bHit)
         {
-            //Msg = FString::Printf(TEXT("HIT"));
-            //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+
+            UPhysicalMaterial* PhysMat = Hit.PhysMaterial.Get();
+            if (PhysMat && PhysMat->SurfaceType != SURFACE_Asphalt)
+            {
+                WheelsOffTrack += 1;
+            }
+
             FVector springDir = FVector::UpVector;
             FVector tireWorldVel = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(Start);
 
@@ -372,10 +393,53 @@ void ARacingCar::SuspensionWheelForce()
 
             float vel = FVector::DotProduct(springDir, tireWorldVel);
             float force = (offset * SpringStrength) - (vel * SpringDamping);
-            Msg = FString::Printf(TEXT("FORCE: %.2f"), force);
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
 
             CarSkeletalMesh->AddForceAtLocation(springDir * force, Start);
+
+            //SteerForce(Bone);
+
+            DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f, 0, 2.0f);
         }
+
     }
+
+    if (WheelsOffTrack == 4)
+    {
+        bIsOffTrack = true;
+    }
+
+    if (bIsOffTrack && !bWasOffTrack)
+    {
+        Penalty += 5;
+        FString Msg = FString::Printf(TEXT("BONE: %.2f"), Penalty);
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+    }
+
+    bWasOffTrack = bIsOffTrack;
+}
+
+//TESTING
+void ARacingCar::SteerForce(FName Bone)
+{
+
+    FVector SteeringDir = CarSkeletalMesh->GetSocketTransform(Bone, ERelativeTransformSpace::RTS_Component).GetUnitAxis(EAxis::Y);
+
+
+    FVector TireWorldVelocity = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(CarSkeletalMesh->GetBoneLocation(Bone));
+
+    float LateralVelocity = FVector::DotProduct(SteeringDir, TireWorldVelocity);
+
+    float DesiredVelChange = -LateralVelocity * GripFactor;
+
+    float DesiredAccel = DesiredVelChange / GetWorld()->GetDeltaSeconds();
+
+    float Damping = 0.7f;
+    DesiredAccel = FMath::Lerp(0.0f, DesiredAccel, Damping);
+
+    FVector LateralForce = SteeringDir * DesiredAccel * TireMass;
+
+    float MaxLateralForce = 5000.0f;
+    LateralForce = LateralForce.GetClampedToMaxSize(MaxLateralForce);
+
+    CarSkeletalMesh->AddForceAtLocation(LateralForce, CarSkeletalMesh->GetBoneLocation(Bone));
 }

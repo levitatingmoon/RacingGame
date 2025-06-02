@@ -40,6 +40,10 @@ public:
     FString FormatTime(float TimeSeconds, bool bMilliseconds);
     
     void SuspensionWheelForce();
+    void SteerForce(FName Bone);
+
+    float GripFactor = 1.0f;
+    float TireMass = 50.0f;
 
     void Throttle(float Val);
     void Steer(float Val);
@@ -75,6 +79,8 @@ public:
     int StartedLaps = 1;
     bool bRaceEnded = false;
     bool bStartedFirstLap = false;
+
+    bool bWasOffTrack = false;
 
     FVector2D ThrottleInput;
     float SteerInput;

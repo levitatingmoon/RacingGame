@@ -25,7 +25,7 @@ protected:
 
 public:
     float QualiTime = 0.f;
-    float MaxQualiTime = 10.f;
+    float MaxQualiTime = 200.f;
     bool bQualiOver = false;
 
     int LapLimit = 1;
@@ -37,7 +37,7 @@ public:
     bool bIsRace = false;
 
     int NrOfSectors = 0;
-
+ 
     int CurrentLight = 0;
     int LightsNumber = 5;
 
