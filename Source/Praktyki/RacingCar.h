@@ -10,6 +10,7 @@ class APraktykiGameModeBase;
 class URaceWidget;
 class UEndRaceWidget;
 class UStartRaceWidget;
+class UMainMenuWidget;
 class ARacingCarMovementComponent;
 
 UCLASS()
@@ -40,10 +41,12 @@ public:
     FString FormatTime(float TimeSeconds, bool bMilliseconds);
     
     void SuspensionWheelForce();
-    void SteerForce(FName Bone);
-
+    void SteerForce();
+    UPROPERTY(EditAnywhere, Category = "Physics")
     float GripFactor = 1.0f;
-    float TireMass = 50.0f;
+    UPROPERTY(EditAnywhere, Category = "Physics")
+    float TireMass = 1.0f;
+
 
     void Throttle(float Val);
     void Steer(float Val);
@@ -136,6 +139,9 @@ public:
     UPROPERTY()
     UEndRaceWidget* EndRaceWidget;
 
+    UPROPERTY()
+    UMainMenuWidget* MainMenuWidget;
+
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<URaceWidget> RaceWidgetClass;
 
@@ -145,10 +151,27 @@ public:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<UEndRaceWidget> EndRaceWidgetClass;
 
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UMainMenuWidget> MainMenuWidgetClass;
+
     UPROPERTY()
     APraktykiGameModeBase* GameMode;
 
     float SpringStrength = 8000.0f;
     float SpringDamping = 2000.0f;
+
+    UPROPERTY()
+    TArray<UStaticMeshComponent*> MeshesWithLiveryMaterial;
+
+    void GetAllLiveryMeshes();
+    void ChangeMeshMaterial(int Index);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+    UMaterialInterface* TargetMaterial;
+
+    UMaterialInterface* CurrentMaterial;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+    TArray<UMaterialInterface*> LiveryMaterials;
 
 };

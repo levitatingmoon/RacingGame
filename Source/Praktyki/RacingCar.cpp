@@ -4,6 +4,7 @@
 #include "RaceWidget.h"
 #include "EndRaceWidget.h"
 #include "StartRaceWidget.h"
+#include "MainMenuWidget.h"
 #include "SurfaceTypes.h"
 
 ARacingCar::ARacingCar()
@@ -39,6 +40,7 @@ void ARacingCar::BeginPlay()
     CurrentSectorTimes.SetNum(NumberOfSectors);
     BestSectorTimes.SetNum(NumberOfSectors);
 
+    
     APlayerController* PC = Cast<APlayerController>(GetController());
     if (PC && RaceWidgetClass)
     {
@@ -50,6 +52,17 @@ void ARacingCar::BeginPlay()
         }
     }
 
+    if (PC && MainMenuWidgetClass)
+    {
+        MainMenuWidget = CreateWidget<UMainMenuWidget>(PC, MainMenuWidgetClass);
+        if (MainMenuWidget)
+        {
+            MainMenuWidget->AddToViewport();
+            MainMenuWidget->OwningRacingCar = this;
+            //MainMenuWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
+        }
+    }
+
 
     if (PC && StartRaceWidgetClass)
     {
@@ -58,6 +71,8 @@ void ARacingCar::BeginPlay()
         StartRaceWidget = CreateWidget<UStartRaceWidget>(PC, StartRaceWidgetClass);
     }
 
+    GetAllLiveryMeshes();
+    CurrentMaterial = TargetMaterial;
 }
 
 void ARacingCar::Tick(float DeltaTime)
@@ -87,6 +102,7 @@ void ARacingCar::Tick(float DeltaTime)
         FVector SidewaysFrictionForce = -RightVector * SidewaysSpeed * SidewaysFrictionStrength;
         CarSkeletalMesh->AddForce(SidewaysFrictionForce);
 
+        //Slowing down when no input
         float ForwardSpeed = FVector::DotProduct(Velocity, ForwardVector);
         if (ThrottleInput.IsNearlyZero())
         {
@@ -94,6 +110,7 @@ void ARacingCar::Tick(float DeltaTime)
             CarSkeletalMesh->AddForce(ForwardResistance);
         }
         
+        //adding force when input
         if (!ThrottleInput.IsNearlyZero())
         {
             float Speed = CarSkeletalMesh->GetComponentVelocity().Size();
@@ -103,15 +120,19 @@ void ARacingCar::Tick(float DeltaTime)
             FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale;
             CarSkeletalMesh->AddForce(Force);
 
-            UE_LOG(LogTemp, Warning, TEXT("Speed: %.1f, Force scale: %.2f"), Speed, ForceScale);
+            //UE_LOG(LogTemp, Warning, TEXT("Speed: %.1f, Force scale: %.2f"), Speed, ForceScale);
         }
 
         
         if (FMath::Abs(SteerInput) > 0.01f)
         {
-            FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
-            CarSkeletalMesh->AddTorqueInRadians(Torque);
+            //FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
+            //CarSkeletalMesh->AddTorqueInRadians(Torque);
+
+            //SteerForce();
         }
+
+        SteerForce();
         
     }
 }
@@ -131,7 +152,7 @@ void ARacingCar::Throttle(float Val)
 {
     if (!bIsStopped)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Throttle input: %f"), Val);
+        //UE_LOG(LogTemp, Warning, TEXT("Throttle input: %f"), Val);
         ThrottleInput.X = FMath::Clamp(Val, -1.f, 1.f);
     }
 
@@ -141,7 +162,7 @@ void ARacingCar::Steer(float Val)
 {
     if (!bIsStopped)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Steer input: %f"), Val);
+        //UE_LOG(LogTemp, Warning, TEXT("Steer input: %f"), Val);
         SteerInput = FMath::Clamp(Val, -1.f, 1.f);
     }
 
@@ -190,7 +211,7 @@ void ARacingCar::StopCar()
     CarSkeletalMesh->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
     CarSkeletalMesh->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 
-    UE_LOG(LogTemp, Warning, TEXT("StoppedCar"));
+    //UE_LOG(LogTemp, Warning, TEXT("StoppedCar"));
 }
 
 void ARacingCar::StartCar()
@@ -335,6 +356,48 @@ void ARacingCar::LightsOut()
 
 }
 
+void ARacingCar::GetAllLiveryMeshes()
+{
+    TArray<USceneComponent*> AllChildrenComponents;
+    CarSkeletalMesh->GetChildrenComponents(true, AllChildrenComponents);
+
+    for (USceneComponent* ChildComp : AllChildrenComponents)
+    {
+        if (UStaticMeshComponent* StaticMeshComp = Cast<UStaticMeshComponent>(ChildComp))
+        {
+            if (StaticMeshComp)
+            {
+                int32 NumMaterials = StaticMeshComp->GetNumMaterials();
+                for (int32 MatIndex = 0; MatIndex < NumMaterials; ++MatIndex)
+                {
+                    if (StaticMeshComp->GetMaterial(MatIndex) == TargetMaterial)
+                    {
+                        MeshesWithLiveryMaterial.Add(StaticMeshComp);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void ARacingCar::ChangeMeshMaterial(int Index)
+{
+
+    for (UStaticMeshComponent* StaticMesh : MeshesWithLiveryMaterial)
+    {
+        int32 NumMaterials = StaticMesh->GetNumMaterials();
+        for (int32 MatIndex = 0; MatIndex < NumMaterials; ++MatIndex)
+        {
+            if (StaticMesh->GetMaterial(MatIndex) == CurrentMaterial)
+            {
+                StaticMesh->SetMaterial(MatIndex, LiveryMaterials[Index]);
+            }
+        }
+    }
+    CurrentMaterial = LiveryMaterials[Index];
+}
+
 FString ARacingCar::FormatTime(float TimeSeconds, bool bMilliseconds)
 {
     int32 TotalMilliseconds = FMath::RoundToInt(TimeSeconds * 1000.0f);
@@ -398,7 +461,7 @@ void ARacingCar::SuspensionWheelForce()
 
             //SteerForce(Bone);
 
-            DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.0f, 0, 2.0f);
+            DrawDebugLine(GetWorld(), Start, Start + (springDir * force)/10000.0f, FColor::Blue, false, 2.0f, 0, 2.0f);
         }
 
     }
@@ -419,27 +482,58 @@ void ARacingCar::SuspensionWheelForce()
 }
 
 //TESTING
-void ARacingCar::SteerForce(FName Bone)
+void ARacingCar::SteerForce()
 {
+    for (const FName& Bone : WheelBones)
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("SteerInput: %f"), SteerInput);
 
-    FVector SteeringDir = CarSkeletalMesh->GetSocketTransform(Bone, ERelativeTransformSpace::RTS_Component).GetUnitAxis(EAxis::Y);
+        FRotator BoneRotation = CarSkeletalMesh->GetBoneQuaternion(Bone).Rotator();
+        FVector SteeringDir = BoneRotation.RotateVector(FVector::RightVector);
+
+        UE_LOG(LogTemp, Warning, TEXT("Wheel %s SteeringDir: %s"), *Bone.ToString(), *SteeringDir.ToString());
+
+        FVector WheelVelocity = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(CarSkeletalMesh->GetBoneLocation(Bone));
 
 
-    FVector TireWorldVelocity = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(CarSkeletalMesh->GetBoneLocation(Bone));
+        if (Bone == WheelBones[0] || Bone == WheelBones[1])
+        {
 
-    float LateralVelocity = FVector::DotProduct(SteeringDir, TireWorldVelocity);
+            FVector ForwardDir = BoneRotation.RotateVector(FVector::ForwardVector);
+            float ForwardSpeed = FVector::DotProduct(WheelVelocity, ForwardDir);
 
-    float DesiredVelChange = -LateralVelocity * GripFactor;
+            float SteeringStrength = FMath::Clamp(ForwardSpeed * 2.0f, 10.f, 50.f);
 
-    float DesiredAccel = DesiredVelChange / GetWorld()->GetDeltaSeconds();
+            //FVector LateralSteeringForce = SteeringDir * SteerInput * SteeringStrength;
 
-    float Damping = 0.7f;
-    DesiredAccel = FMath::Lerp(0.0f, DesiredAccel, Damping);
+            FVector LateralSteeringForce = SteeringDir * SteerInput * ForwardSpeed * SteeringStrength; //SteeringStrength;
 
-    FVector LateralForce = SteeringDir * DesiredAccel * TireMass;
+            UE_LOG(LogTemp, Warning, TEXT("FORWARD: %f"), ForwardSpeed);
+            if (FMath::Abs(SteerInput) > 0.01f)
+            {
+                CarSkeletalMesh->AddForceAtLocation(LateralSteeringForce, CarSkeletalMesh->GetBoneLocation(Bone));
+            }
+            UE_LOG(LogTemp, Warning, TEXT("FORCE: %f %f %f"), LateralSteeringForce.X, LateralSteeringForce.Y, LateralSteeringForce.Z);
 
-    float MaxLateralForce = 5000.0f;
-    LateralForce = LateralForce.GetClampedToMaxSize(MaxLateralForce);
+            DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + LateralSteeringForce * 0.01f, FColor::Green, false, 0.1f, 0, 2.0f);
+        
+        }
+        
+        float SteeringVelocity = FVector::DotProduct(SteeringDir, WheelVelocity);
 
-    CarSkeletalMesh->AddForceAtLocation(LateralForce, CarSkeletalMesh->GetBoneLocation(Bone));
+        float DesiredVelChange = -SteeringVelocity * GripFactor; //0-1 friction
+
+        float DesiredAccel = DesiredVelChange / GetWorld()->GetDeltaSeconds();
+
+        FVector GripForce = SteeringDir * DesiredAccel * TireMass;
+
+        UE_LOG(LogTemp, Warning, TEXT("GRIP: %f %f %f"), GripForce.X, GripForce.Y, GripForce.Z);
+        if (FMath::Abs(SteerInput) > 0.01f)
+        {
+            CarSkeletalMesh->AddForceAtLocation(GripForce, CarSkeletalMesh->GetBoneLocation(Bone));
+        }
+        DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + GripForce * 0.01f, FColor::Red, false, 0.1f, 0, 2.0f);
+
+        
+    }
 }

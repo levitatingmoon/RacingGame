@@ -9,6 +9,7 @@
 class UTextBlock;
 class USlider;
 class UButton;
+class ARacingCar;
 
 /**
  * 
@@ -43,6 +44,18 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* ResetSettingsButton;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* RedMaterialButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* GreenMaterialButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* BlueMaterialButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* DefaultMaterialButton;
+
 	float TimeLimitSliderDefault = 300.0f;
 
 	int LapLimitSliderDefault = 10;
@@ -61,4 +74,19 @@ public:
 
 	UFUNCTION()
 	void OnStartClicked();
+
+	UFUNCTION()
+	void OnRedClicked();
+
+	UFUNCTION()
+	void OnGreenClicked();
+
+	UFUNCTION()
+	void OnBlueClicked();
+
+	UFUNCTION()
+	void OnDefaultClicked();
+
+	UPROPERTY(BlueprintReadWrite)
+	ARacingCar* OwningRacingCar;
 };

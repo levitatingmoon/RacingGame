@@ -8,6 +8,7 @@
 #include "RacingGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "RacingCar.h"
 
 void UMainMenuWidget::NativeConstruct()
 {
@@ -36,6 +37,26 @@ void UMainMenuWidget::NativeConstruct()
     if (StartGameButton)
     {
         StartGameButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnStartClicked);
+    }
+
+    if (DefaultMaterialButton)
+    {
+        DefaultMaterialButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnDefaultClicked);
+    }
+
+    if (RedMaterialButton)
+    {
+        RedMaterialButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnRedClicked);
+    }
+
+    if (BlueMaterialButton)
+    {
+        BlueMaterialButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnBlueClicked);
+    }
+
+    if (GreenMaterialButton)
+    {
+        GreenMaterialButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnGreenClicked);
     }
 }
 
@@ -70,7 +91,9 @@ void UMainMenuWidget::OnResetClicked()
     OnTimeLimitSliderChanged(TimeLimitSliderDefault);
 
     LapLimitSlider->SetValue(LapLimitSliderDefault);
-    OnTimeLimitSliderChanged(LapLimitSliderDefault);
+    OnLapLimitSliderChanged(LapLimitSliderDefault);
+
+    OwningRacingCar->ChangeMeshMaterial(3);
 }
 
 void UMainMenuWidget::OnStartClicked()
@@ -78,4 +101,24 @@ void UMainMenuWidget::OnStartClicked()
     RemoveFromParent();
 
     UGameplayStatics::OpenLevel(this, "TestMap");
+}
+
+void UMainMenuWidget::OnRedClicked()
+{
+    OwningRacingCar->ChangeMeshMaterial(0);
+}
+
+void UMainMenuWidget::OnGreenClicked()
+{
+    OwningRacingCar->ChangeMeshMaterial(1);
+}
+
+void UMainMenuWidget::OnBlueClicked()
+{
+    OwningRacingCar->ChangeMeshMaterial(2);
+}
+
+void UMainMenuWidget::OnDefaultClicked()
+{
+    OwningRacingCar->ChangeMeshMaterial(3);
 }
