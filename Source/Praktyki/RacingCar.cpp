@@ -6,6 +6,9 @@
 #include "StartRaceWidget.h"
 #include "MainMenuWidget.h"
 #include "SurfaceTypes.h"
+#include "Misc/Paths.h"
+#include "MyPlayerController.h"
+
 
 ARacingCar::ARacingCar()
 {
@@ -26,10 +29,6 @@ void ARacingCar::BeginPlay()
     UseBehindCamera();
 
     CarSkeletalMesh = Cast<USkeletalMeshComponent>(GetRootComponent());
-    if (!CarSkeletalMesh)
-    {
-        UE_LOG(LogTemp, Error, TEXT("CarSkeletalMesh is null!"));
-    }
 
     FVector CenterOfMassOffset = FVector(0.f, 0.f, -200.f);
     CarSkeletalMesh->SetCenterOfMass(CenterOfMassOffset);
@@ -40,35 +39,9 @@ void ARacingCar::BeginPlay()
     CurrentSectorTimes.SetNum(NumberOfSectors);
     BestSectorTimes.SetNum(NumberOfSectors);
 
-    
-    APlayerController* PC = Cast<APlayerController>(GetController());
-    if (PC && RaceWidgetClass)
+    for (int i = 0; i < NumberOfSectors; i++)
     {
-        RaceWidget = CreateWidget<URaceWidget>(PC, RaceWidgetClass);
-        if (RaceWidget)
-        {
-            RaceWidget->AddToViewport();
-            RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
-        }
-    }
-
-    if (PC && MainMenuWidgetClass)
-    {
-        MainMenuWidget = CreateWidget<UMainMenuWidget>(PC, MainMenuWidgetClass);
-        if (MainMenuWidget)
-        {
-            MainMenuWidget->AddToViewport();
-            MainMenuWidget->OwningRacingCar = this;
-            //MainMenuWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
-        }
-    }
-
-
-    if (PC && StartRaceWidgetClass)
-    {
-        FString Msg = FString::Printf(TEXT("START RACE CLASS"));
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
-        StartRaceWidget = CreateWidget<UStartRaceWidget>(PC, StartRaceWidgetClass);
+        BestSectorTimes[i] = FLT_MAX;
     }
 
     GetAllLiveryMeshes();
@@ -79,18 +52,9 @@ void ARacingCar::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (GameMode)
-    {
-        RaceWidget->Timer->SetText(FText::FromString(FormatTime(GameMode->QualiTime, false)));
-        if (bStartedFirstLap)
-        {
-            RaceWidget->SectorTimer->SetText(FText::FromString(FormatTime(GameMode->QualiTime - SectorStartTime, false)));
-        }
-
-    }
-
     if (!bIsStopped)
     {
+        UE_LOG(LogTemp, Warning, TEXT("TICK"));
         SuspensionWheelForce();
 
         
@@ -120,19 +84,18 @@ void ARacingCar::Tick(float DeltaTime)
             FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale;
             CarSkeletalMesh->AddForce(Force);
 
-            //UE_LOG(LogTemp, Warning, TEXT("Speed: %.1f, Force scale: %.2f"), Speed, ForceScale);
         }
 
         
         if (FMath::Abs(SteerInput) > 0.01f)
         {
-            //FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
-            //CarSkeletalMesh->AddTorqueInRadians(Torque);
+            FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
+            CarSkeletalMesh->AddTorqueInRadians(Torque);
 
             //SteerForce();
         }
 
-        SteerForce();
+        //SteerForce();
         
     }
 }
@@ -150,6 +113,7 @@ void ARacingCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void ARacingCar::Throttle(float Val)
 {
+
     if (!bIsStopped)
     {
         //UE_LOG(LogTemp, Warning, TEXT("Throttle input: %f"), Val);
@@ -211,11 +175,12 @@ void ARacingCar::StopCar()
     CarSkeletalMesh->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
     CarSkeletalMesh->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
 
-    //UE_LOG(LogTemp, Warning, TEXT("StoppedCar"));
+    UE_LOG(LogTemp, Warning, TEXT("STOPPED"));
 }
 
 void ARacingCar::StartCar()
 {
+    UE_LOG(LogTemp, Warning, TEXT("START"));
     bIsStopped = false;
 }
 
@@ -243,6 +208,14 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
         //End of Lap
         else if (PreviousSectorNumber == NumberOfSectors - 1)
         {
+            //End of lap, so the last sector ends here
+            CurrentSectorTimes[NumberOfSectors - 1] = TimerTime - SectorStartTime;
+
+            if (CurrentSectorTimes[NumberOfSectors - 1] < BestSectorTimes[NumberOfSectors - 1])
+            {
+                BestSectorTimes[NumberOfSectors - 1] = CurrentSectorTimes[NumberOfSectors - 1];
+            }
+
             PreviousLapTime = TimerTime - StartLapTime;
             StartLapTime = TimerTime;
             SectorStartTime = TimerTime;
@@ -252,26 +225,22 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
                 if (PreviousLapTime < BestRaceLap || StartedLaps == 1)
                 {
                     BestRaceLap = PreviousLapTime;
-                    RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestRaceLap, true)));
                 }
 
                 //LapTimes.Add(PreviousLapTime);
 
                 StartedLaps += 1;
-                RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), StartedLaps, GameMode->LapLimit)));
             }
             else if (GameMode->bIsQuali)
             {
                 if(PreviousLapTime < BestQualiLap || StartedLaps == 1)
                 {
                     BestQualiLap = PreviousLapTime;
-                    RaceWidget->BestLap->SetText(FText::FromString(FormatTime(BestQualiLap, true)));
                 }
 
                 //LapTimes.Add(PreviousLapTime);
 
                 StartedLaps += 1;
-                RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d"), StartedLaps)));
             }
 
             PreviousSectorNumber = SectorNumber;
@@ -285,6 +254,11 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
 
         CurrentSectorTimes[SectorNumber-1] = TimerTime - SectorStartTime;
 
+        if (CurrentSectorTimes[SectorNumber - 1] < BestSectorTimes[SectorNumber - 1])
+        {
+            BestSectorTimes[SectorNumber - 1] = CurrentSectorTimes[SectorNumber - 1];
+        }
+
         SectorStartTime = TimerTime;
 
         if (PreviousSectorNumber == SectorNumber - 1)
@@ -297,62 +271,7 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
     {
         bRaceEnded = true;
         StopCar();
-        GetEndRaceStatistics();
     }
-
-}
-
-void ARacingCar::GetEndRaceStatistics()
-{
-    RaceWidget->RemoveFromParent();
-
-    APlayerController* PC = Cast<APlayerController>(GetController());
-    if (PC && EndRaceWidgetClass)
-    {
-        EndRaceWidget = CreateWidget<UEndRaceWidget>(PC, EndRaceWidgetClass);
-        if (EndRaceWidget)
-        {
-            EndRaceWidget->AddToViewport();
-            PC->bShowMouseCursor = true;
-
-            EndRaceWidget->BestTime->SetText(FText::FromString(FormatTime(BestQualiLap, true)));
-            EndRaceWidget->FastestLap->SetText(FText::FromString(FormatTime(BestRaceLap, true)));
-            EndRaceWidget->Penalties->SetText(FText::FromString(FormatTime(Penalty, true)));
-            EndRaceWidget->RaceTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime, true)));
-        }
-
-    }
-  
-}
-
-void ARacingCar::StartRaceCountdown()
-{
-    RaceWidget->SetVisibility(ESlateVisibility::Hidden);
-
-    APlayerController* PC = Cast<APlayerController>(GetController());
-    if (PC && StartRaceWidgetClass)
-    {
-        StartRaceWidget = CreateWidget<UStartRaceWidget>(PC, StartRaceWidgetClass);
-        if (StartRaceWidget)
-        {
-            StartRaceWidget->AddToViewport();
-        }
-    }
-}
-
-void ARacingCar::LightOn(int LightIndex)
-{
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("LIGHT ON"));
-    StartRaceWidget->SetLightColour(LightIndex, FLinearColor::Red);
-}
-
-void ARacingCar::LightsOut()
-{
-    //StartRaceWidget->SetLightColour(0, FLinearColor::Black);
-    //StartRaceWidget->SetLightColour(1, FLinearColor::Black);
-    //StartRaceWidget->SetLightColour(2, FLinearColor::Black);
-    //StartRaceWidget->SetLightColour(3, FLinearColor::Black);
-    //StartRaceWidget->SetLightColour(4, FLinearColor::Black);
 
 }
 
@@ -491,7 +410,7 @@ void ARacingCar::SteerForce()
         FRotator BoneRotation = CarSkeletalMesh->GetBoneQuaternion(Bone).Rotator();
         FVector SteeringDir = BoneRotation.RotateVector(FVector::RightVector);
 
-        UE_LOG(LogTemp, Warning, TEXT("Wheel %s SteeringDir: %s"), *Bone.ToString(), *SteeringDir.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("Wheel %s SteeringDir: %s"), *Bone.ToString(), *SteeringDir.ToString());
 
         FVector WheelVelocity = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(CarSkeletalMesh->GetBoneLocation(Bone));
 
@@ -513,7 +432,7 @@ void ARacingCar::SteerForce()
             {
                 CarSkeletalMesh->AddForceAtLocation(LateralSteeringForce, CarSkeletalMesh->GetBoneLocation(Bone));
             }
-            UE_LOG(LogTemp, Warning, TEXT("FORCE: %f %f %f"), LateralSteeringForce.X, LateralSteeringForce.Y, LateralSteeringForce.Z);
+            //UE_LOG(LogTemp, Warning, TEXT("FORCE: %f %f %f"), LateralSteeringForce.X, LateralSteeringForce.Y, LateralSteeringForce.Z);
 
             DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + LateralSteeringForce * 0.01f, FColor::Green, false, 0.1f, 0, 2.0f);
         
@@ -527,7 +446,7 @@ void ARacingCar::SteerForce()
 
         FVector GripForce = SteeringDir * DesiredAccel * TireMass;
 
-        UE_LOG(LogTemp, Warning, TEXT("GRIP: %f %f %f"), GripForce.X, GripForce.Y, GripForce.Z);
+        //UE_LOG(LogTemp, Warning, TEXT("GRIP: %f %f %f"), GripForce.X, GripForce.Y, GripForce.Z);
         if (FMath::Abs(SteerInput) > 0.01f)
         {
             CarSkeletalMesh->AddForceAtLocation(GripForce, CarSkeletalMesh->GetBoneLocation(Bone));

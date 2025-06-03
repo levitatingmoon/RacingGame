@@ -8,6 +8,7 @@
 
 class ARacingCar;
 class ATimingLine;
+class AMyPlayerController;
 /**
  * 
  */
@@ -54,5 +55,7 @@ public:
     FTimerHandle TimerHandleTimeToStart;
 
     int SectorNumber = 0;
+
+    bool bIsMenu = false;
 	 
 };

@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
 #include "RaceWidget.generated.h"
+
+class UTextBlock;
+class UHorizontalBox;
+class ARacingCar;
 
 /**
  * 
@@ -16,6 +19,14 @@ class PRAKTYKI_API URaceWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void CreateSectorBox();
+
+	UFUNCTION()
+	void UpdateSectorBox(int Index);
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Timer;
@@ -28,4 +39,14 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* SectorTimer;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* CurrentLap;
+
+	UPROPERTY(meta = (BindWidget))
+	UHorizontalBox* SectorBox;
+
+	UPROPERTY(BlueprintReadWrite)
+	ARacingCar* OwningRacingCar;
+
 };

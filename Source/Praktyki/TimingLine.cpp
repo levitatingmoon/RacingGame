@@ -4,6 +4,7 @@
 #include "TimingLine.h"
 #include "PraktykiGameModeBase.h"
 #include "RacingCar.h"
+#include "MyPlayerController.h"
 
 // Sets default values
 ATimingLine::ATimingLine()
@@ -39,8 +40,16 @@ void ATimingLine::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	ARacingCar* RacingCar = Cast<ARacingCar>(OtherActor);
 	if (RacingCar)
 	{
+
 		Msg = FString::Printf(TEXT("SECTOR TIME: %.2f"), GameMode->QualiTime);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
 		RacingCar->StoreCheckpointTime(SectorNumber, GameMode->QualiTime);
+
+		AMyPlayerController* PC = Cast<AMyPlayerController>(RacingCar->GetController());
+		if (PC)
+		{
+			PC->SectorUpdate(SectorNumber);
+		}
+
 	}
 }

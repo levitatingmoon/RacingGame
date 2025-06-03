@@ -12,6 +12,7 @@ class UEndRaceWidget;
 class UStartRaceWidget;
 class UMainMenuWidget;
 class ARacingCarMovementComponent;
+class AMyPlayerCController;
 
 UCLASS()
 class PRAKTYKI_API ARacingCar : public APawn
@@ -60,11 +61,6 @@ public:
     UCameraComponent* FindCameraByName(FName CameraName);
 
     void StoreCheckpointTime(int SectorNumber, float QualiTime);
-
-    void GetEndRaceStatistics();
-    void StartRaceCountdown();
-    void LightOn(int LightIndex);
-    void LightsOut();
 
     TArray<float> CurrentSectorTimes;
     TArray<float> BestSectorTimes;

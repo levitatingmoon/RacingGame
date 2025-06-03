@@ -5,10 +5,12 @@
 #include "RacingCar.h"
 #include "TimingLine.h"
 #include <Kismet/GameplayStatics.h>
+#include "MyPlayerController.h"
 
 APraktykiGameModeBase::APraktykiGameModeBase()
 {
     PrimaryActorTick.bCanEverTick = true;
+    PlayerControllerClass = AMyPlayerController::StaticClass();
 }
 
 void APraktykiGameModeBase::BeginPlay()
@@ -17,24 +19,38 @@ void APraktykiGameModeBase::BeginPlay()
     QualiTime = 0.f;
     bQualiOver = false;
     bIsQuali = false;
-
-    UE_LOG(LogTemp, Warning, TEXT("Race Starts: %.2f"), QualiTime);
-
-    GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::QualiStart, 3.0f, false);
-
     TArray<AActor*> AllTimingLines;
-    if (GetWorld())
+
+    //GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::QualiStart, 3.0f, false);
+
+    FString MapName = GetWorld()->GetMapName();
+    MapName = FPackageName::GetShortName(MapName);
+
+    if (MapName.Contains(TEXT("MainMenu")))
+    {
+        bIsMenu = true;
+    }
+    else
     {
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATimingLine::StaticClass(), AllTimingLines);
+        SectorNumber = AllTimingLines.Num();
+        bIsMenu = false;
+        //GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::QualiStart, 3.0f, false);
+        QualiStart();
     }
 
-    SectorNumber = AllTimingLines.Num();
+    
 }
 
 void APraktykiGameModeBase::QualiStart()
 {
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("QUALI START"));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("QUALI START"));
     bIsQuali = true;
+    ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    if (Car)
+    {
+        Car->StartCar();
+    }
 }
 
 void APraktykiGameModeBase::QualiEnd()
@@ -43,8 +59,13 @@ void APraktykiGameModeBase::QualiEnd()
     QualiTime = 0.0f;
     if (Car)
     {
-        Car->PrepareForRace();
-        Car->StartRaceCountdown();
+        AMyPlayerController* PC = Cast<AMyPlayerController>(Car->GetController());
+        if (PC)
+        {
+            Car->PrepareForRace();
+            PC->StartRaceCountdown();
+        }
+
     }
 
     CurrentLight = 0;
@@ -82,7 +103,12 @@ void APraktykiGameModeBase::LightSequence()
     if (Car)
     {
         GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("LIGHT SEQUENCE"));
-        Car->LightOn(CurrentLight);
+        AMyPlayerController* PC = Cast<AMyPlayerController>(Car->GetController());
+        if (PC)
+        {
+            PC->LightOn(CurrentLight);
+        }
+        //Car->LightOn(CurrentLight);
         CurrentLight++;
         if (CurrentLight < LightsNumber)
         {
