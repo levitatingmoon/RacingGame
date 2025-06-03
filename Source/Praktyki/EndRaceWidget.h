@@ -7,6 +7,7 @@
 #include "EndRaceWidget.generated.h"
 
 class UTextBlock;
+class UButton;
 /**
  * 
  */
@@ -16,6 +17,8 @@ class PRAKTYKI_API UEndRaceWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+
+	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* BestTime;
@@ -28,5 +31,17 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Penalties;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* MenuButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* RaceAgainButton;
+
+	UFUNCTION()
+	void OnRaceAgainClicked();
+
+	UFUNCTION()
+	void OnMenuClicked();
 	
 };
