@@ -12,6 +12,14 @@
 UCLASS()
 class PRAKTYKI_API URacingGameInstance : public UGameInstance
 {
-	GENERATED_BODY()
+	GENERATED_BODY() 
+
+public:
+	UPROPERTY()
+	float TimeLimitValue = 300.0f;
+
+	UPROPERTY()
+	int LapLimitValue = 10;
+
 	
 };
