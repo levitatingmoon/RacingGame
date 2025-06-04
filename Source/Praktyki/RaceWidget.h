@@ -68,15 +68,17 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PenaltyText;
 
-	//UPROPERTY(meta = (BindWidget))
-	//UTextBlock* SectorTimeDifference;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* SectorTimeDifference;
 
 	UPROPERTY(BlueprintReadWrite)
 	ARacingCar* OwningRacingCar;
 
-	FTimerHandle SectorColourTimer;
-
 	UPROPERTY()
 	TArray<UImage*> SectorImages;
+
+	FTimerHandle SectorColourTimer;
+
+	FTimerHandle SectorDifferenceTimer;
 
 };

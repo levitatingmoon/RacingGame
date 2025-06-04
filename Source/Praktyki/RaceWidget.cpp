@@ -78,10 +78,12 @@ void URaceWidget::ResetSectorBoxes()
 
 void URaceWidget::ShowSectorDifference()
 {
-	//SectorTimeDifference->SetVisibility(ESlateVisibility::Visible);
+	SectorTimeDifference->SetVisibility(ESlateVisibility::Visible);
+
+	GetWorld()->GetTimerManager().SetTimer(SectorDifferenceTimer, this, &URaceWidget::HideSectorDifference, 2.0f, false);
 }
 
 void URaceWidget::HideSectorDifference()
 {
-	//SectorTimeDifference->SetVisibility(ESlateVisibility::Collapsed);
+	SectorTimeDifference->SetVisibility(ESlateVisibility::Collapsed);
 }

@@ -68,6 +68,7 @@ public:
     UCameraComponent* FindCameraByName(FName CameraName);
 
     TArray<float> CurrentSectorTimes;
+    TArray<float> PreviousBestSectorTimes;
     TArray<float> BestSectorTimes;
     TArray<float> LapTimes;
 

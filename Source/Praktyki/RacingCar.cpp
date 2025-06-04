@@ -40,10 +40,12 @@ void ARacingCar::BeginPlay()
 
     CurrentSectorTimes.SetNum(NumberOfSectors);
     BestSectorTimes.SetNum(NumberOfSectors);
+    PreviousBestSectorTimes.SetNum(NumberOfSectors);
 
     for (int i = 0; i < NumberOfSectors; i++)
     {
-        BestSectorTimes[i] = 100000.0f;
+        BestSectorTimes[i] = FLT_MAX;
+        PreviousBestSectorTimes[i] = FLT_MAX;
         CurrentSectorTimes[i] = 0.0f;
     }
 
