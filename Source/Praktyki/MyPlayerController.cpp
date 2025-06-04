@@ -248,8 +248,22 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
             {
                 if (!Car->bThisLapPenalty)
                 {
-                    Car->PreviousBestSectorTimes[Car->NumberOfSectors - 1] = Car->BestSectorTimes[Car->NumberOfSectors - 1];
+                    if (Car->BestSectorTimes[Car->NumberOfSectors - 1] != FLT_MAX)
+                    {
+                        float TimeDifference = Car->CurrentSectorTimes[Car->NumberOfSectors - 1] - Car->BestSectorTimes[Car->NumberOfSectors - 1];
+                        FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
+                        if (TimeDifference < 0.0f)
+                        {
+                            RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
+                        }
+                        else
+                        {
+                            RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
+                        }
+                        RaceWidget->ShowSectorDifference();
+                    }
 
+                    Car->PreviousBestSectorTimes[Car->NumberOfSectors - 1] = Car->BestSectorTimes[Car->NumberOfSectors - 1];
                     Car->BestSectorTimes[Car->NumberOfSectors - 1] = Car->CurrentSectorTimes[Car->NumberOfSectors - 1];
                 }
                 
@@ -257,25 +271,24 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
             }
             else
             {
+                if (!Car->bThisLapPenalty)
+                {
+                    if (Car->BestSectorTimes[Car->NumberOfSectors - 1] != FLT_MAX)
+                    {
+                        float TimeDifference = Car->CurrentSectorTimes[Car->NumberOfSectors - 1] - Car->BestSectorTimes[Car->NumberOfSectors - 1];
+                        FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
+                        if (TimeDifference < 0.0f)
+                        {
+                            RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
+                        }
+                        else
+                        {
+                            RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
+                        }
+                        RaceWidget->ShowSectorDifference();
+                    }
+                }
                 RaceWidget->SectorImages[Car->NumberOfSectors - 1]->SetColorAndOpacity(FLinearColor::Yellow);
-            }
-
-            FString Msg = FString::Printf(TEXT("BEST TIME: %.2f"), Car->BestSectorTimes[Car->NumberOfSectors - 1]);
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
-            if (Car->StartedLaps != 1 && Car->BestSectorTimes[Car->NumberOfSectors - 1] != FLT_MAX)
-            {
-                float TimeDifference = Car->CurrentSectorTimes[Car->NumberOfSectors - 1] - Car->BestSectorTimes[Car->NumberOfSectors - 1];
-                FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
-                if (TimeDifference < 0.0f)
-                {
-                    RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
-                }
-                else
-                {
-                    RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
-                }
-
-                RaceWidget->ShowSectorDifference();
             }
 
             
@@ -334,6 +347,21 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
         {
             if (!Car->bThisLapPenalty)
             {
+                if (Car->BestSectorTimes[Index - 1] != FLT_MAX)
+                {
+                    float TimeDifference = Car->CurrentSectorTimes[Index - 1] - Car->BestSectorTimes[Index - 1];
+                    FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
+                    if (TimeDifference < 0.0f)
+                    {
+                        RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
+                    }
+                    else
+                    {
+                        RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
+                    }
+                    RaceWidget->ShowSectorDifference();
+                }
+
                 Car->PreviousBestSectorTimes[Index - 1] = Car->BestSectorTimes[Index - 1];
                 Car->BestSectorTimes[Index - 1] = Car->CurrentSectorTimes[Index - 1];
             }
@@ -341,25 +369,24 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
         }
         else
         {
+            if (!Car->bThisLapPenalty)
+            {
+                if (Car->BestSectorTimes[Index - 1] != FLT_MAX)
+                {
+                    float TimeDifference = Car->CurrentSectorTimes[Index - 1] - Car->BestSectorTimes[Index - 1];
+                    FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
+                    if (TimeDifference < 0.0f)
+                    {
+                        RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
+                    }
+                    else
+                    {
+                        RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
+                    }
+                    RaceWidget->ShowSectorDifference();
+                }
+            }
             RaceWidget->SectorImages[Index - 1]->SetColorAndOpacity(FLinearColor::Yellow);
-        }
-
-        FString Msg = FString::Printf(TEXT("BEST TIME: %.2f"), Car->BestSectorTimes[Index - 1]);
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
-        if (Car->StartedLaps != 1 && Car->BestSectorTimes[Index - 1] != FLT_MAX)
-        {
-            float TimeDifference = Car->CurrentSectorTimes[Index - 1] - Car->BestSectorTimes[Index - 1];
-            FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
-            if (TimeDifference < 0.0f)
-            {
-                RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
-            }
-            else
-            {
-                RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
-            }
-
-            RaceWidget->ShowSectorDifference();
         }
 
         Car->SectorStartTime = TimerTime;
