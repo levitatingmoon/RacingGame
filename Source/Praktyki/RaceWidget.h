@@ -9,6 +9,7 @@
 class UTextBlock;
 class UHorizontalBox;
 class ARacingCar;
+class UImage;
 
 /**
  * 
@@ -28,6 +29,12 @@ public:
 	UFUNCTION()
 	void UpdateSectorBox(int Index);
 
+	UFUNCTION()
+	void ShowPenalty();
+
+	UFUNCTION()
+	void HidePenalty();
+
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Timer;
 
@@ -45,6 +52,12 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UHorizontalBox* SectorBox;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* PenaltyBackground;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* PenaltyText;
 
 	UPROPERTY(BlueprintReadWrite)
 	ARacingCar* OwningRacingCar;

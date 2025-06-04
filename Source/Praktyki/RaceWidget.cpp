@@ -6,13 +6,13 @@
 #include "Components/Image.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/TextBlock.h"
 #include "RacingCar.h"
 
 
 void URaceWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
 
 }
 
@@ -94,4 +94,17 @@ void URaceWidget::UpdateSectorBox(int Index)
 			}
 		}
 	}
+}
+
+void URaceWidget::ShowPenalty()
+{
+	PenaltyText->SetVisibility(ESlateVisibility::Visible);
+	PenaltyBackground->SetVisibility(ESlateVisibility::Visible);
+
+}
+
+void URaceWidget::HidePenalty()
+{
+	PenaltyText->SetVisibility(ESlateVisibility::Collapsed);
+	PenaltyBackground->SetVisibility(ESlateVisibility::Collapsed);
 }

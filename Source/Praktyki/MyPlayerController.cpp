@@ -43,6 +43,11 @@ void AMyPlayerController::BeginPlay()
             Car->StartCar();
         }
     }
+
+    if (Car)
+    {
+        Car->OnPenaltyUpdated.AddDynamic(this, &AMyPlayerController::ShowPenalty);
+    }
     
 }
 
@@ -203,8 +208,8 @@ void AMyPlayerController::GetEndRaceStatistics()
         {
             EndRaceWidget->BestTime->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
             EndRaceWidget->FastestLap->SetText(FText::FromString(FormatTime(Car->BestRaceLap, true)));
-            EndRaceWidget->Penalties->SetText(FText::FromString(FormatTime(Car->Penalty, true)));
-            EndRaceWidget->RaceTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime, true)));
+            EndRaceWidget->Penalties->SetText(FText::FromString(FString::Printf(TEXT("+%.1f"), Car->Penalty)));
+            EndRaceWidget->RaceTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime + Car->Penalty, true)));
         }
     }
 }
@@ -220,7 +225,10 @@ void AMyPlayerController::SectorUpdate(int Index)
     }
     else if (GameMode->bIsQuali)
     {
-        RaceWidget->BestLap->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
+        if (Car->StartedLaps != 1 && !Car->bPreviousLapPenalty)
+        {
+            RaceWidget->BestLap->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
+        }
         RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d"), Car->StartedLaps)));
     }
 
@@ -265,4 +273,33 @@ void AMyPlayerController::LightsOut()
 
     GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMyPlayerController::ChangeWidgetsAtRaceStart, 1.0f, false);
 
+}
+
+void AMyPlayerController::ShowPenalty(float Penalty)
+{
+    FString Msg = FString::Printf(TEXT("PENALTY"));
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+    if (RaceWidget)
+    {
+        Msg = FString::Printf(TEXT("WIDGET"));
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+        if (GameMode->bIsRace)
+        {
+            RaceWidget->PenaltyText->SetText(FText::FromString(TEXT("PENALTY: +5 SECONDS - Exceeded track limits")));
+        }
+        else if (GameMode->bIsQuali)
+        {
+            RaceWidget->PenaltyText->SetText(FText::FromString(TEXT("PENALTY: LAP TIME DELETED - Exceeded track limits")));
+        }
+        RaceWidget->ShowPenalty();
+        GetWorld()->GetTimerManager().SetTimer(VisibilityTimer, this, &AMyPlayerController::HidePenalty, 3.0f, false);
+    }
+}
+
+void AMyPlayerController::HidePenalty()
+{
+    if (RaceWidget)
+    {
+        RaceWidget->HidePenalty();
+    }
 }

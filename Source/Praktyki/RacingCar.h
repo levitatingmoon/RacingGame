@@ -14,6 +14,8 @@ class UMainMenuWidget;
 class ARacingCarMovementComponent;
 class AMyPlayerCController;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPenaltyUpdated, float, Penalty);
+
 UCLASS()
 class PRAKTYKI_API ARacingCar : public APawn
 {
@@ -43,10 +45,14 @@ public:
     
     void SuspensionWheelForce();
     void SteerForce();
+
     UPROPERTY(EditAnywhere, Category = "Physics")
     float GripFactor = 1.0f;
     UPROPERTY(EditAnywhere, Category = "Physics")
     float TireMass = 1.0f;
+
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnPenaltyUpdated OnPenaltyUpdated;
 
 
     void Throttle(float Val);
@@ -69,7 +75,7 @@ public:
     int NumberOfSectors = 0;
     float PreviousLapTime;
     float BestRaceLap;
-    float BestQualiLap;
+    float BestQualiLap = 10000.0f;
     float StartLapTime;
     float SectorStartTime;
     float RaceTime;
@@ -81,6 +87,8 @@ public:
     bool bFirstLap = false;
 
     bool bWasOffTrack = false;
+    bool bThisLapPenalty = false;
+    bool bPreviousLapPenalty = false;
 
     FVector2D ThrottleInput;
     float SteerInput;
@@ -170,5 +178,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
     TArray<UMaterialInterface*> LiveryMaterials;
+
+    void UpdateFOV();
 
 };

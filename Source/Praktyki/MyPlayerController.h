@@ -60,6 +60,8 @@ public:
 
     FTimerHandle TimerHandle;
 
+    FTimerHandle VisibilityTimer;
+
     bool bEndRaceWidget = false;
 
     void AddMainMenuWidget();
@@ -93,6 +95,11 @@ public:
     void LightOn(int LightIndex);
 
     void LightsOut();
+
+    UFUNCTION()
+    void ShowPenalty(float Penalty);
+
+    void HidePenalty();
 
 
 
