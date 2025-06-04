@@ -9,6 +9,7 @@
 #include "Misc/Paths.h"
 #include "MyPlayerController.h"
 #include "RacingGameInstance.h"
+#include "StartingSpot.h"
 
 
 ARacingCar::ARacingCar()
@@ -201,7 +202,8 @@ void ARacingCar::PrepareForRace()
     StartLapTime = 0;
     Penalty = 0.0f;
 
-    SetActorLocation(FVector(-2000.f, 0.f, 200.f), false, nullptr, ETeleportType::TeleportPhysics);
+    SetActorLocationAndRotation(StartingSpot->GetActorLocation(),StartingSpot->GetActorRotation(),false,nullptr,ETeleportType::TeleportPhysics);
+
 }
 
 void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)

@@ -113,7 +113,7 @@ void AMyPlayerController::AddRaceWidget()
         {
             RaceWidget->AddToViewport();
             RaceWidget->OwningRacingCar = Car;
-            RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), Car->StartedLaps, GameMode->LapLimit)));
+            RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Car->StartedLaps, GameMode->LapLimit)));
             RaceWidget->CreateSectorBox();
         }
     }
@@ -221,7 +221,7 @@ void AMyPlayerController::SectorUpdate(int Index)
     if (GameMode->bIsRace)
     {
         RaceWidget->BestLap->SetText(FText::FromString(FormatTime(Car->BestRaceLap, true)));
-        RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), Car->StartedLaps, GameMode->LapLimit)));
+        RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Car->StartedLaps, GameMode->LapLimit)));
     }
     else if (GameMode->bIsQuali)
     {

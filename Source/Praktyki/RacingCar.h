@@ -12,7 +12,8 @@ class UEndRaceWidget;
 class UStartRaceWidget;
 class UMainMenuWidget;
 class ARacingCarMovementComponent;
-class AMyPlayerCController;
+class AMyPlayerController;
+class AStartingSpot;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPenaltyUpdated, float, Penalty);
 
@@ -178,6 +179,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
     TArray<UMaterialInterface*> LiveryMaterials;
+
+    UPROPERTY(EditAnywhere, Category = "Location")
+    AStartingSpot* StartingSpot;
 
     void UpdateFOV();
 
