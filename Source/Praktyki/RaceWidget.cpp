@@ -41,59 +41,18 @@ void URaceWidget::CreateSectorBox()
 				BoxSlot->SetHorizontalAlignment(HAlign_Fill);
 				BoxSlot->SetVerticalAlignment(VAlign_Fill);
 			}
+
+			SectorImages.Add(SectorImage);
 		}
 	}
 
 }
 
-void URaceWidget::UpdateSectorBox(int Index)
+void URaceWidget::UpdateSectorBox()
 {
-	APraktykiGameModeBase* GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
-	if (SectorBox->HasAnyChildren())
-	{
-		UWidget* Child = SectorBox->GetChildAt(Index - 1);
-		if (Index == 0)
-		{
-			Child = SectorBox->GetChildAt(GameMode->SectorNumber - 1);
-		}
-		
-		if (Child)
-		{
-			UImage* SectorImage = Cast<UImage>(Child);
-			if (SectorImage)
-			{
-				if (Index != 0)
-				{
-					
-					if (OwningRacingCar->CurrentSectorTimes[Index - 1] <= OwningRacingCar->BestSectorTimes[Index - 1])
-					{
-						SectorImage->SetColorAndOpacity(FLinearColor::Green);
-					}
-					else
-					{
-						SectorImage->SetColorAndOpacity(FLinearColor::Yellow);
-					}
 
-				}
-				else
-				{
-					if (!OwningRacingCar->bFirstLap)
-					{
-						if (OwningRacingCar->CurrentSectorTimes[GameMode->SectorNumber - 1] <= OwningRacingCar->BestSectorTimes[GameMode->SectorNumber - 1])
-						{
-							SectorImage->SetColorAndOpacity(FLinearColor::Green);
-						}
-						else
-						{
-							SectorImage->SetColorAndOpacity(FLinearColor::Yellow);
-						}
-					}
+	GetWorld()->GetTimerManager().SetTimer(SectorColourTimer, this, &URaceWidget::ResetSectorBoxes, 2.0f, false);
 
-				}
-
-			}
-		}
-	}
 }
 
 void URaceWidget::ShowPenalty()
@@ -107,4 +66,22 @@ void URaceWidget::HidePenalty()
 {
 	PenaltyText->SetVisibility(ESlateVisibility::Collapsed);
 	PenaltyBackground->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void URaceWidget::ResetSectorBoxes()
+{
+	for (UImage* Image : SectorImages)
+	{
+		Image->SetColorAndOpacity(FLinearColor::Black);
+	}
+}
+
+void URaceWidget::ShowSectorDifference()
+{
+	//SectorTimeDifference->SetVisibility(ESlateVisibility::Visible);
+}
+
+void URaceWidget::HideSectorDifference()
+{
+	//SectorTimeDifference->SetVisibility(ESlateVisibility::Collapsed);
 }

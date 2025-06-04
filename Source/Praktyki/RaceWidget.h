@@ -27,13 +27,22 @@ public:
 	void CreateSectorBox();
 
 	UFUNCTION()
-	void UpdateSectorBox(int Index);
+	void UpdateSectorBox();
 
 	UFUNCTION()
 	void ShowPenalty();
 
 	UFUNCTION()
 	void HidePenalty();
+
+	UFUNCTION()
+	void ResetSectorBoxes();
+
+	UFUNCTION()
+	void ShowSectorDifference();
+
+	UFUNCTION()
+	void HideSectorDifference();
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Timer;
@@ -59,7 +68,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PenaltyText;
 
+	//UPROPERTY(meta = (BindWidget))
+	//UTextBlock* SectorTimeDifference;
+
 	UPROPERTY(BlueprintReadWrite)
 	ARacingCar* OwningRacingCar;
+
+	FTimerHandle SectorColourTimer;
+
+	UPROPERTY()
+	TArray<UImage*> SectorImages;
 
 };

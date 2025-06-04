@@ -10,6 +10,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "PraktykiGameModeBase.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 
 void AMyPlayerController::BeginPlay()
 {
@@ -72,7 +73,7 @@ void AMyPlayerController::Tick(float DeltaTime)
         }
     }
 
-    if (!GameMode->bIsMenu && Car->bRaceEnded && !bEndRaceWidget)
+    if (GameMode && !GameMode->bIsMenu && Car->bRaceEnded && !bEndRaceWidget)
     {
          GetEndRaceStatistics();
          bEndRaceWidget = true;
@@ -206,7 +207,14 @@ void AMyPlayerController::GetEndRaceStatistics()
     {
         if (EndRaceWidget)
         {
-            EndRaceWidget->BestTime->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
+            if (Car->BestQualiLap == 0.0f)
+            {
+                EndRaceWidget->BestTime->SetText(FText::FromString(TEXT("NO TIME")));
+            }
+            else
+            {
+                EndRaceWidget->BestTime->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
+            }
             EndRaceWidget->FastestLap->SetText(FText::FromString(FormatTime(Car->BestRaceLap, true)));
             EndRaceWidget->Penalties->SetText(FText::FromString(FString::Printf(TEXT("+%.1f"), Car->Penalty)));
             EndRaceWidget->RaceTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime + Car->Penalty, true)));
@@ -214,10 +222,11 @@ void AMyPlayerController::GetEndRaceStatistics()
     }
 }
 
-void AMyPlayerController::SectorUpdate(int Index)
+void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
 {
     //ARacingCar* Car = Cast<ARacingCar>(GetPawn());
     //APraktykiGameModeBase* GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
+    /*
     if (GameMode->bIsRace)
     {
         RaceWidget->BestLap->SetText(FText::FromString(FormatTime(Car->BestRaceLap, true)));
@@ -231,10 +240,129 @@ void AMyPlayerController::SectorUpdate(int Index)
         }
         RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d"), Car->StartedLaps)));
     }
+    */
+    //RaceWidget->UpdateSectorBox(Index);
 
-    RaceWidget->UpdateSectorBox(Index);
+    if (Index == 0)
+    {
+        //Start of Race
+        if (Car->PreviousSectorNumber == 0)
+        {
+            Car->StartLapTime = TimerTime;
+            Car->SectorStartTime = TimerTime;
+            Car->bStartedFirstLap = true;
+            Car->bFirstLap = true;
+
+            RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Car->StartedLaps, GameMode->LapLimit)));
+        }
+        //End of Lap
+        else if (Car->PreviousSectorNumber == Car->NumberOfSectors - 1)
+        {
+            Car->bFirstLap = false;
+
+            //End of lap, so the last sector ends here
+            Car->CurrentSectorTimes[Car->NumberOfSectors - 1] = TimerTime - Car->SectorStartTime;
+
+            if (Car->CurrentSectorTimes[Car->NumberOfSectors - 1] < Car->BestSectorTimes[Car->NumberOfSectors - 1])
+            {
+                if (!Car->bThisLapPenalty)
+                {
+                    Car->BestSectorTimes[Car->NumberOfSectors - 1] = Car->CurrentSectorTimes[Car->NumberOfSectors - 1];
+                }
+                
+                RaceWidget->SectorImages[Car->NumberOfSectors - 1]->SetColorAndOpacity(FLinearColor::Green);
+            }
+            else
+            {
+                RaceWidget->SectorImages[Car->NumberOfSectors - 1]->SetColorAndOpacity(FLinearColor::Yellow);
+            }
+
+            
+            Car->PreviousLapTime = TimerTime - Car->StartLapTime;
+            Car->StartLapTime = TimerTime;
+            Car->SectorStartTime = TimerTime;
+
+            if (GameMode->bIsRace)
+            {
+                if (Car->PreviousLapTime < Car->BestRaceLap || Car->StartedLaps == 1)
+                {
+                    Car->BestRaceLap = Car->PreviousLapTime;
+                }
+
+                Car->StartedLaps += 1;
+                RaceWidget->BestLap->SetText(FText::FromString(FormatTime(Car->BestRaceLap, true)));
+            }
+            else if (GameMode->bIsQuali)
+            {
+                if (!Car->bThisLapPenalty)
+                {
+                    if (Car->BestQualiLap > Car->PreviousLapTime)
+                    {
+                        Car->BestQualiLap = Car->PreviousLapTime;
+                        RaceWidget->BestLap->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
+                    }
+                    else if (Car->BestQualiLap == 0.0f)
+                    {
+                        Car->BestQualiLap = Car->PreviousLapTime;
+                        RaceWidget->BestLap->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
+                    }
+
+                }
+
+                Car->StartedLaps += 1;
+                RaceWidget->UpdateSectorBox();
+            }
+
+            Car->bPreviousLapPenalty = Car->bThisLapPenalty;
+            Car->bThisLapPenalty = false;
+            Car->PreviousSectorNumber = Index;
+        }
+
+    }
+    else
+    {
+
+        Car->CurrentSectorTimes[Index - 1] = TimerTime - Car->SectorStartTime;
+
+        if (Car->CurrentSectorTimes[Index - 1] < Car->BestSectorTimes[Index - 1])
+        {
+            if (!Car->bThisLapPenalty)
+            {
+                Car->BestSectorTimes[Index - 1] = Car->CurrentSectorTimes[Index - 1];
+            }
+            RaceWidget->SectorImages[Index - 1]->SetColorAndOpacity(FLinearColor::Green);
+        }
+        else
+        {
+            RaceWidget->SectorImages[Index - 1]->SetColorAndOpacity(FLinearColor::Yellow);
+        }
+
+        Car->SectorStartTime = TimerTime;
+
+        if (Car->PreviousSectorNumber == Index - 1)
+        {
+            Car->PreviousSectorNumber = Index;
+        }
+    }
+
+    if (Car->StartedLaps > GameMode->LapLimit && !Car->bRaceEnded && GameMode->bIsRace)
+    {
+        Car->bRaceEnded = true;
+        Car->StopCar();
+    }
+
+    if (GameMode->bIsRace)
+    {
+        RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Car->StartedLaps, GameMode->LapLimit)));
+    }
+    else if (GameMode->bIsQuali)
+    {
+        RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d"), Car->StartedLaps)));
+    }
+
 
 }
+
 
 FString AMyPlayerController::FormatTime(float TimeSeconds, bool bMilliseconds)
 {

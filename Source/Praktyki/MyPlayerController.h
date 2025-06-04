@@ -86,7 +86,7 @@ public:
 
     void GetEndRaceStatistics();
 
-    void SectorUpdate(int Index);
+    void SectorUpdate(int Index, float TimerTime);
 
     FString FormatTime(float TimeSeconds, bool bMilliseconds);
 

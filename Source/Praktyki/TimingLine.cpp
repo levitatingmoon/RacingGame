@@ -43,12 +43,12 @@ void ATimingLine::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 		Msg = FString::Printf(TEXT("SECTOR TIME: %.2f"), GameMode->QualiTime);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
-		RacingCar->StoreCheckpointTime(SectorNumber, GameMode->QualiTime);
 
+		//RacingCar->StoreCheckpointTime(SectorNumber, GameMode->QualiTime);
 		AMyPlayerController* PC = Cast<AMyPlayerController>(RacingCar->GetController());
 		if (PC)
 		{
-			PC->SectorUpdate(SectorNumber);
+			PC->SectorUpdate(SectorNumber, GameMode->QualiTime);
 		}
 
 	}

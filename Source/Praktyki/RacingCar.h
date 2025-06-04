@@ -67,8 +67,6 @@ public:
     void UseHoodCamera();
     UCameraComponent* FindCameraByName(FName CameraName);
 
-    void StoreCheckpointTime(int SectorNumber, float QualiTime);
-
     TArray<float> CurrentSectorTimes;
     TArray<float> BestSectorTimes;
     TArray<float> LapTimes;
@@ -76,7 +74,7 @@ public:
     int NumberOfSectors = 0;
     float PreviousLapTime;
     float BestRaceLap;
-    float BestQualiLap = 10000.0f;
+    float BestQualiLap = 0.0f;
     float StartLapTime;
     float SectorStartTime;
     float RaceTime;

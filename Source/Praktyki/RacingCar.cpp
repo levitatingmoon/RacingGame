@@ -206,98 +206,6 @@ void ARacingCar::PrepareForRace()
 
 }
 
-void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
-{
-    if (SectorNumber == 0)
-    {
-        //Start of Race
-        if (PreviousSectorNumber == 0)
-        {
-            StartLapTime = TimerTime;
-            SectorStartTime = TimerTime;
-            bStartedFirstLap = true;
-            bFirstLap = true;
-        }
-        //End of Lap
-        else if (PreviousSectorNumber == NumberOfSectors - 1)
-        {
-            bFirstLap = false;
-
-            //End of lap, so the last sector ends here
-            CurrentSectorTimes[NumberOfSectors - 1] = TimerTime - SectorStartTime;
-
-            if (CurrentSectorTimes[NumberOfSectors - 1] < BestSectorTimes[NumberOfSectors - 1] && !bThisLapPenalty)
-            {
-                BestSectorTimes[NumberOfSectors - 1] = CurrentSectorTimes[NumberOfSectors - 1];
-            }
-
-            PreviousLapTime = TimerTime - StartLapTime;
-            StartLapTime = TimerTime;
-            SectorStartTime = TimerTime;
-
-            if (GameMode->bIsRace)
-            {
-                if (PreviousLapTime < BestRaceLap || StartedLaps == 1)
-                {
-                    BestRaceLap = PreviousLapTime;
-                }
-
-                //LapTimes.Add(PreviousLapTime);
-
-                StartedLaps += 1;
-            }
-            else if (GameMode->bIsQuali)
-            {
-                FString Msg = FString::Printf(TEXT("BEST LAP: %.2f"), BestQualiLap);
-                GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, Msg);
-                Msg = FString::Printf(TEXT("PREVIOUS LAP: %.2f"), PreviousLapTime);
-                GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Green, Msg);
-
-                Msg = FString::Printf(TEXT("IS OFF TRACK: %s"), bThisLapPenalty ? TEXT("true") : TEXT("false"));
-                GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Red, Msg);
-                if(PreviousLapTime < BestQualiLap && !bThisLapPenalty)
-                {
-                    BestQualiLap = PreviousLapTime;
-                }
-
-
-                //LapTimes.Add(PreviousLapTime);
-
-                StartedLaps += 1;
-            }
-
-            bPreviousLapPenalty = bThisLapPenalty;
-            bThisLapPenalty = false;
-            PreviousSectorNumber = SectorNumber;
-        }
-
-    }
-    else 
-    {
-
-        CurrentSectorTimes[SectorNumber-1] = TimerTime - SectorStartTime;
-
-        if (CurrentSectorTimes[SectorNumber - 1] < BestSectorTimes[SectorNumber - 1] && !bThisLapPenalty)
-        {
-            BestSectorTimes[SectorNumber - 1] = CurrentSectorTimes[SectorNumber - 1];
-        }
-
-        SectorStartTime = TimerTime;
-
-        if (PreviousSectorNumber == SectorNumber - 1)
-        {
-            PreviousSectorNumber = SectorNumber;
-        }
-    }
-
-    if (StartedLaps > GameMode->LapLimit && !bRaceEnded && GameMode->bIsRace)
-    {
-        bRaceEnded = true;
-        StopCar();
-    }
-
-}
-
 void ARacingCar::GetAllLiveryMeshes()
 {
     TArray<USceneComponent*> AllChildrenComponents;
@@ -348,7 +256,7 @@ void ARacingCar::UpdateFOV()
     float Speed = GetVelocity().Size();
     float SpeedFactor = FMath::Clamp(Speed / MaxSpeed, 0.0f, 1.0f);
 
-    float NewFOV = FMath::Lerp(90.0f, 110.0f, SpeedFactor);
+    float NewFOV = FMath::Lerp(90.0f, 120.0f, SpeedFactor);
 
     if (BehindCamera->IsActive())
     {
