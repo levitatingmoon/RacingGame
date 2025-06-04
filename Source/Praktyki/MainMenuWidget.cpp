@@ -100,25 +100,49 @@ void UMainMenuWidget::OnStartClicked()
 {
     RemoveFromParent();
 
+    APlayerController* PC = Cast<APlayerController>(OwningRacingCar->GetController());
+    if (PC)
+    {
+        PC->bShowMouseCursor = false;
+        FInputModeGameOnly InputMode;
+        PC->SetInputMode(InputMode);
+    }
+
     UGameplayStatics::OpenLevel(this, "TestMap");
 }
 
 void UMainMenuWidget::OnRedClicked()
 {
     OwningRacingCar->ChangeMeshMaterial(0);
+    if (URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GetWorld()->GetGameInstance()))
+    {
+        GameInstance->MaterialIndex = 0;
+    }
 }
 
 void UMainMenuWidget::OnGreenClicked()
 {
     OwningRacingCar->ChangeMeshMaterial(1);
+    if (URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GetWorld()->GetGameInstance()))
+    {
+        GameInstance->MaterialIndex = 1;
+    }
 }
 
 void UMainMenuWidget::OnBlueClicked()
 {
     OwningRacingCar->ChangeMeshMaterial(2);
+    if (URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GetWorld()->GetGameInstance()))
+    {
+        GameInstance->MaterialIndex = 2;
+    }
 }
 
 void UMainMenuWidget::OnDefaultClicked()
 {
     OwningRacingCar->ChangeMeshMaterial(3);
+    if (URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GetWorld()->GetGameInstance()))
+    {
+        GameInstance->MaterialIndex = 3;
+    }
 }

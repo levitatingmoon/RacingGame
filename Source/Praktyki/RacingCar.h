@@ -78,6 +78,7 @@ public:
     int StartedLaps = 1;
     bool bRaceEnded = false;
     bool bStartedFirstLap = false;
+    bool bFirstLap = false;
 
     bool bWasOffTrack = false;
 

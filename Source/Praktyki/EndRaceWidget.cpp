@@ -4,6 +4,7 @@
 #include "EndRaceWidget.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
+#include "RacingCar.h"
 
 void UEndRaceWidget::NativeConstruct()
 {
@@ -18,6 +19,14 @@ void UEndRaceWidget::OnRaceAgainClicked()
 {
     RemoveFromParent();
 
+    APlayerController* PC = Cast<APlayerController>(OwningRacingCar->GetController());
+    if (PC)
+    {
+        PC->bShowMouseCursor = false;
+        FInputModeGameOnly InputMode;
+        PC->SetInputMode(InputMode);
+    }
+
     UGameplayStatics::OpenLevel(this, "TestMap");
 }
 
@@ -25,5 +34,5 @@ void UEndRaceWidget::OnMenuClicked()
 {
     RemoveFromParent();
 
-    UGameplayStatics::OpenLevel(this, "TestMap");
+    UGameplayStatics::OpenLevel(this, "MenuMap");
 }

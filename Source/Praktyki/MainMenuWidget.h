@@ -89,4 +89,5 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	ARacingCar* OwningRacingCar;
+
 };

@@ -21,5 +21,8 @@ public:
 	UPROPERTY()
 	int LapLimitValue = 10;
 
+	UPROPERTY()
+	int MaterialIndex = 3;
+
 	
 };

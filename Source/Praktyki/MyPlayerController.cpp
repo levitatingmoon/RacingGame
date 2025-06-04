@@ -51,12 +51,30 @@ void AMyPlayerController::Tick(float DeltaTime)
 {
     if (GameMode && !GameMode->bIsMenu && RaceWidget)
     {
-        RaceWidget->Timer->SetText(FText::FromString(FormatTime(GameMode->QualiTime, false)));
+        if (GameMode->bIsQuali)
+        {
+            RaceWidget->Timer->SetText(FText::FromString(FormatTime(GameMode->QualiCountdownTime, false)));
+        }
+        else if (GameMode->bIsRace)
+        {
+            RaceWidget->Timer->SetText(FText::FromString(FormatTime(GameMode->QualiTime, false)));
+        }
+        
+        RaceWidget->CurrentLap->SetText(FText::FromString(FormatTime(GameMode->QualiTime - Car->StartLapTime, true)));
         if (Car->bStartedFirstLap)
         {
-            RaceWidget->SectorTimer->SetText(FText::FromString(FormatTime(GameMode->QualiTime - Car->SectorStartTime, false)));
+            RaceWidget->SectorTimer->SetText(FText::FromString(FormatTime(GameMode->QualiTime - Car->SectorStartTime, true)));
         }
     }
+
+    if (!GameMode->bIsMenu && Car->bRaceEnded && !bEndRaceWidget)
+    {
+         GetEndRaceStatistics();
+         bEndRaceWidget = true;
+
+    }
+
+
 }
 
 void AMyPlayerController::AddMainMenuWidget()
@@ -68,6 +86,13 @@ void AMyPlayerController::AddMainMenuWidget()
         {
             MainMenuWidget->AddToViewport();
             MainMenuWidget->OwningRacingCar = Car;
+
+            bShowMouseCursor = true;
+
+            FInputModeUIOnly InputMode;
+            InputMode.SetWidgetToFocus(MainMenuWidget->TakeWidget());
+            InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+            SetInputMode(InputMode);
         }
     }
 }
@@ -109,6 +134,13 @@ void AMyPlayerController::AddEndRaceWidget()
         if (EndRaceWidget)
         {
             EndRaceWidget->AddToViewport();
+            EndRaceWidget->OwningRacingCar = Car;
+            bShowMouseCursor = true;
+
+            FInputModeUIOnly InputMode;
+            InputMode.SetWidgetToFocus(EndRaceWidget->TakeWidget());
+            InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+            SetInputMode(InputMode);
         }
     }
 }
@@ -147,7 +179,13 @@ void AMyPlayerController::RemoveEndRaceWidget()
 
 void AMyPlayerController::UpdateRaceWidget()
 {
+    
+}
 
+void AMyPlayerController::ChangeWidgetsAtRaceStart()
+{
+    RemoveStartRaceWidget();
+    AddRaceWidget();
 }
 
 
@@ -163,8 +201,6 @@ void AMyPlayerController::GetEndRaceStatistics()
     {
         if (EndRaceWidget)
         {
-            bShowMouseCursor = true;
-
             EndRaceWidget->BestTime->SetText(FText::FromString(FormatTime(Car->BestQualiLap, true)));
             EndRaceWidget->FastestLap->SetText(FText::FromString(FormatTime(Car->BestRaceLap, true)));
             EndRaceWidget->Penalties->SetText(FText::FromString(FormatTime(Car->Penalty, true)));
@@ -227,6 +263,6 @@ void AMyPlayerController::LightsOut()
     StartRaceWidget->SetLightColour(3, FLinearColor::Black);
     StartRaceWidget->SetLightColour(4, FLinearColor::Black);
 
-
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMyPlayerController::ChangeWidgetsAtRaceStart, 1.0f, false);
 
 }

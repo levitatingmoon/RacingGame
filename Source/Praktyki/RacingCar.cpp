@@ -8,6 +8,7 @@
 #include "SurfaceTypes.h"
 #include "Misc/Paths.h"
 #include "MyPlayerController.h"
+#include "RacingGameInstance.h"
 
 
 ARacingCar::ARacingCar()
@@ -41,11 +42,17 @@ void ARacingCar::BeginPlay()
 
     for (int i = 0; i < NumberOfSectors; i++)
     {
-        BestSectorTimes[i] = FLT_MAX;
+        BestSectorTimes[i] = 100000.0f;
+        CurrentSectorTimes[i] = 0.0f;
     }
 
     GetAllLiveryMeshes();
     CurrentMaterial = TargetMaterial;
+
+    UGameInstance* GI = GetWorld()->GetGameInstance();
+    URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GI);
+
+    ChangeMeshMaterial(GameInstance->MaterialIndex);
 }
 
 void ARacingCar::Tick(float DeltaTime)
@@ -54,7 +61,6 @@ void ARacingCar::Tick(float DeltaTime)
 
     if (!bIsStopped)
     {
-        UE_LOG(LogTemp, Warning, TEXT("TICK"));
         SuspensionWheelForce();
 
         
@@ -204,10 +210,13 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
             StartLapTime = TimerTime;
             SectorStartTime = TimerTime;
             bStartedFirstLap = true;
+            bFirstLap = true;
         }
         //End of Lap
         else if (PreviousSectorNumber == NumberOfSectors - 1)
         {
+            bFirstLap = false;
+
             //End of lap, so the last sector ends here
             CurrentSectorTimes[NumberOfSectors - 1] = TimerTime - SectorStartTime;
 
@@ -249,8 +258,6 @@ void ARacingCar::StoreCheckpointTime(int SectorNumber, float TimerTime)
     }
     else 
     {
-        FString Msg = FString::Printf(TEXT("QUALI TIME: %.2f"), CurrentSectorTimes.Num());
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
 
         CurrentSectorTimes[SectorNumber-1] = TimerTime - SectorStartTime;
 
@@ -302,14 +309,16 @@ void ARacingCar::GetAllLiveryMeshes()
 
 void ARacingCar::ChangeMeshMaterial(int Index)
 {
-
     for (UStaticMeshComponent* StaticMesh : MeshesWithLiveryMaterial)
     {
+
         int32 NumMaterials = StaticMesh->GetNumMaterials();
         for (int32 MatIndex = 0; MatIndex < NumMaterials; ++MatIndex)
         {
+
             if (StaticMesh->GetMaterial(MatIndex) == CurrentMaterial)
             {
+
                 StaticMesh->SetMaterial(MatIndex, LiveryMaterials[Index]);
             }
         }
@@ -393,8 +402,6 @@ void ARacingCar::SuspensionWheelForce()
     if (bIsOffTrack && !bWasOffTrack)
     {
         Penalty += 5;
-        FString Msg = FString::Printf(TEXT("BONE: %.2f"), Penalty);
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
     }
 
     bWasOffTrack = bIsOffTrack;

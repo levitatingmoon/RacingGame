@@ -33,6 +33,7 @@ void URaceWidget::CreateSectorBox()
 
 			UHorizontalBoxSlot* BoxSlot = SectorBox->AddChildToHorizontalBox(SectorImage);
 
+
 			if (BoxSlot)
 			{
 				BoxSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
@@ -50,7 +51,12 @@ void URaceWidget::UpdateSectorBox(int Index)
 	APraktykiGameModeBase* GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
 	if (SectorBox->HasAnyChildren())
 	{
-		UWidget* Child = SectorBox->GetChildAt(Index);
+		UWidget* Child = SectorBox->GetChildAt(Index - 1);
+		if (Index == 0)
+		{
+			Child = SectorBox->GetChildAt(GameMode->SectorNumber - 1);
+		}
+		
 		if (Child)
 		{
 			UImage* SectorImage = Cast<UImage>(Child);
@@ -58,7 +64,8 @@ void URaceWidget::UpdateSectorBox(int Index)
 			{
 				if (Index != 0)
 				{
-					if (OwningRacingCar->CurrentSectorTimes[Index - 1] < OwningRacingCar->BestSectorTimes[Index - 1])
+					
+					if (OwningRacingCar->CurrentSectorTimes[Index - 1] <= OwningRacingCar->BestSectorTimes[Index - 1])
 					{
 						SectorImage->SetColorAndOpacity(FLinearColor::Green);
 					}
@@ -66,18 +73,22 @@ void URaceWidget::UpdateSectorBox(int Index)
 					{
 						SectorImage->SetColorAndOpacity(FLinearColor::Yellow);
 					}
+
 				}
 				else
 				{
-					
-					if (OwningRacingCar->CurrentSectorTimes[GameMode->SectorNumber - 1] < OwningRacingCar->BestSectorTimes[GameMode->SectorNumber - 1])
+					if (!OwningRacingCar->bFirstLap)
 					{
-						SectorImage->SetColorAndOpacity(FLinearColor::Green);
+						if (OwningRacingCar->CurrentSectorTimes[GameMode->SectorNumber - 1] <= OwningRacingCar->BestSectorTimes[GameMode->SectorNumber - 1])
+						{
+							SectorImage->SetColorAndOpacity(FLinearColor::Green);
+						}
+						else
+						{
+							SectorImage->SetColorAndOpacity(FLinearColor::Yellow);
+						}
 					}
-					else
-					{
-						SectorImage->SetColorAndOpacity(FLinearColor::Yellow);
-					}
+
 				}
 
 			}

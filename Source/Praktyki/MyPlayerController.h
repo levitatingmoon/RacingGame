@@ -58,6 +58,10 @@ public:
     UPROPERTY()
     ARacingCar* Car;
 
+    FTimerHandle TimerHandle;
+
+    bool bEndRaceWidget = false;
+
     void AddMainMenuWidget();
 
     void AddRaceWidget();
@@ -76,6 +80,8 @@ public:
 
     void UpdateRaceWidget();
 
+    void ChangeWidgetsAtRaceStart();
+
     void GetEndRaceStatistics();
 
     void SectorUpdate(int Index);
@@ -87,6 +93,8 @@ public:
     void LightOn(int LightIndex);
 
     void LightsOut();
+
+
 
 	
 };

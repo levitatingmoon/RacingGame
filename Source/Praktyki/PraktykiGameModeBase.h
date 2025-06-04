@@ -27,6 +27,7 @@ protected:
 public:
     float QualiTime = 0.f;
     float MaxQualiTime = 200.f;
+    float QualiCountdownTime = 300.0f;
     bool bQualiOver = false;
 
     int LapLimit = 1;
@@ -51,6 +52,8 @@ public:
     void LightsOut();
 
     void LightSequence();
+
+    void GetInstanceValues();
 
     FTimerHandle TimerHandleTimeToStart;
 

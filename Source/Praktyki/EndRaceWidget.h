@@ -8,6 +8,8 @@
 
 class UTextBlock;
 class UButton;
+class ARacingCar;
+
 /**
  * 
  */
@@ -43,5 +45,8 @@ public:
 
 	UFUNCTION()
 	void OnMenuClicked();
+
+	UPROPERTY(BlueprintReadWrite)
+	ARacingCar* OwningRacingCar;
 	
 };

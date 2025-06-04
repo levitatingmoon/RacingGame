@@ -6,6 +6,7 @@
 #include "TimingLine.h"
 #include <Kismet/GameplayStatics.h>
 #include "MyPlayerController.h"
+#include "RacingGameInstance.h"
 
 APraktykiGameModeBase::APraktykiGameModeBase()
 {
@@ -17,6 +18,7 @@ void APraktykiGameModeBase::BeginPlay()
 {
     Super::BeginPlay();
     QualiTime = 0.f;
+    QualiCountdownTime = 300.0f;
     bQualiOver = false;
     bIsQuali = false;
     TArray<AActor*> AllTimingLines;
@@ -26,19 +28,20 @@ void APraktykiGameModeBase::BeginPlay()
     FString MapName = GetWorld()->GetMapName();
     MapName = FPackageName::GetShortName(MapName);
 
-    if (MapName.Contains(TEXT("MainMenu")))
+    if (MapName.Contains(TEXT("Menu")))
     {
         bIsMenu = true;
     }
     else
     {
+        GetInstanceValues();
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATimingLine::StaticClass(), AllTimingLines);
         SectorNumber = AllTimingLines.Num();
         bIsMenu = false;
         //GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::QualiStart, 3.0f, false);
+        QualiCountdownTime = MaxQualiTime;
         QualiStart();
     }
-
     
 }
 
@@ -57,6 +60,7 @@ void APraktykiGameModeBase::QualiEnd()
 {
     ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
     QualiTime = 0.0f;
+    QualiCountdownTime = 300.0f;
     if (Car)
     {
         AMyPlayerController* PC = Cast<AMyPlayerController>(Car->GetController());
@@ -92,7 +96,11 @@ void APraktykiGameModeBase::LightsOut()
     ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
     if (Car)
     {
-        //Car->LightOn(CurrentLight);
+        AMyPlayerController* PC = Cast<AMyPlayerController>(Car->GetController());
+        if (PC)
+        {
+            PC->LightsOut();
+        }
     }
     RaceStart();
 }
@@ -122,16 +130,33 @@ void APraktykiGameModeBase::LightSequence()
     }
 }
 
+void APraktykiGameModeBase::GetInstanceValues()
+{
+
+    UGameInstance* GI = GetWorld()->GetGameInstance();
+    URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GI);
+
+    ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    if (Car)
+    {
+        MaxQualiTime = GameInstance->TimeLimitValue;
+        LapLimit = GameInstance->LapLimitValue;
+    }
+}
+
 void APraktykiGameModeBase::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
 
     if (bIsQuali)
     {
+        QualiCountdownTime -= DeltaSeconds;
         QualiTime += DeltaSeconds;
 
-        if (QualiTime >= MaxQualiTime)
+        if (QualiCountdownTime <= 0.f)
         {
+
+            QualiCountdownTime = 0.f;
             bQualiOver = true;
             GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("QUALI END"));
 
