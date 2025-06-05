@@ -17,5 +17,5 @@
 - [x] Race start UI
 - [] Surface friction
 - [] Sounds
-- [] VFX (Exhaust flame, clouds of gravel)
+- [x] VFX (Exhaust flame, clouds of gravel)
 - [] Controller input
