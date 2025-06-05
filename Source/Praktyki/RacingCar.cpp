@@ -148,7 +148,7 @@ void ARacingCar::Throttle(float Val)
 
         if (PreviousThrottleValue <= 0.0f && Val > 0.1f && ThrottleParticles)
         {
-            ThrottleParticles->Activate(true); // One-shot burst
+            ThrottleParticles->Activate(true);
         }
 
         PreviousThrottleValue = Val;

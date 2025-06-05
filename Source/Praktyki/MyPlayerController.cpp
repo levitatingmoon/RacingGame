@@ -65,7 +65,8 @@ void AMyPlayerController::Tick(float DeltaTime)
         {
             RaceWidget->Timer->SetText(FText::FromString(FormatTime(GameMode->QualiTime, false)));
         }
-        
+
+        RaceWidget->Speed->SetText(FText::FromString(FString::Printf(TEXT("%.0f km/h"), Car->CarSkeletalMesh->GetComponentVelocity().Size() * 0.036f)));
         RaceWidget->CurrentLap->SetText(FText::FromString(FormatTime(GameMode->QualiTime - Car->StartLapTime, true)));
         if (Car->bStartedFirstLap)
         {

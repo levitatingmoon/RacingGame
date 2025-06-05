@@ -71,6 +71,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* SectorTimeDifference;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Speed;
+
 	UPROPERTY(BlueprintReadWrite)
 	ARacingCar* OwningRacingCar;
 
