@@ -11,6 +11,7 @@
 #include "RacingGameInstance.h"
 #include "StartingSpot.h"
 #include "GhostCar.h"
+#include "NiagaraComponent.h"
 
 
 ARacingCar::ARacingCar()
@@ -28,6 +29,10 @@ void ARacingCar::BeginPlay()
     BehindCamera = FindCameraByName(TEXT("BehindCamera"));
     InsideCamera = FindCameraByName(TEXT("InsideCamera"));
     HoodCamera = FindCameraByName(TEXT("HoodCamera"));
+
+    ThrottleParticles = Cast<UNiagaraComponent>(GetDefaultSubobjectByName(TEXT("ExhaustFlame")));
+    WheelLBParticles = Cast<UNiagaraComponent>(GetDefaultSubobjectByName(TEXT("WheelLeftBackEmitter")));
+    WheelRBParticles = Cast<UNiagaraComponent>(GetDefaultSubobjectByName(TEXT("WheelRightBackEmitter")));
 
     UseBehindCamera();
 
@@ -140,6 +145,13 @@ void ARacingCar::Throttle(float Val)
     {
         //UE_LOG(LogTemp, Warning, TEXT("Throttle input: %f"), Val);
         ThrottleInput.X = FMath::Clamp(Val, -1.f, 1.f);
+
+        if (PreviousThrottleValue <= 0.0f && Val > 0.1f && ThrottleParticles)
+        {
+            ThrottleParticles->Activate(true); // One-shot burst
+        }
+
+        PreviousThrottleValue = Val;
     }
 
 }
@@ -358,6 +370,41 @@ void ARacingCar::SuspensionWheelForce()
             if (PhysMat && PhysMat->SurfaceType != SURFACE_Asphalt)
             {
                 WheelsOffTrack += 1;
+
+                if (PhysMat->SurfaceType == SURFACE_Gravel)
+                {
+                    if (Bone == WheelBones[2])
+                    {
+                        FString Msg = FString::Printf(TEXT("ACTIVE RIGHT"));
+                        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Msg);
+                        WheelRBParticles->Activate(true);
+                        //bPreviousGravelRB = true;
+
+                    }
+
+                    if (Bone == WheelBones[3])
+                    {
+                        FString Msg = FString::Printf(TEXT("ACTIVE LEFT"));
+                        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Msg);
+                        WheelLBParticles->Activate(true);
+                        //bPreviousGravelLB = true;
+                    }
+                }
+            }
+
+            if (PhysMat && PhysMat->SurfaceType != SURFACE_Gravel)
+            {
+                if (Bone == WheelBones[2] && bPreviousGravelRB)
+                {
+                    WheelRBParticles->Activate(false);
+                    bPreviousGravelRB = false;
+                }
+
+                if (Bone == WheelBones[3] && bPreviousGravelLB)
+                {
+                    WheelLBParticles->Activate(false);
+                    bPreviousGravelRB = false;
+                }
             }
 
             FVector springDir = FVector::UpVector;

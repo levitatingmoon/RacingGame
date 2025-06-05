@@ -17,6 +17,7 @@ class ARacingCarMovementComponent;
 class AMyPlayerController;
 class AStartingSpot;
 class AGhostCar;
+class UNiagaraComponent;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPenaltyUpdated, float, Penalty);
@@ -48,8 +49,13 @@ private:
     float RecordingTimer = 0.0f;
     bool bRecordingGhost = false;
 
+    float PreviousThrottleValue = 0.0f;
+
     UPROPERTY()
     AGhostCar* LastGhost = nullptr;
+
+    bool bPreviousGravelLB = false;
+    bool bPreviousGravelRB = false;
 
 public:
     virtual void Tick(float DeltaTime) override;
@@ -61,6 +67,15 @@ public:
     void StartGhostRecording();
     void StopGhostRecording();
     TArray<FGhostFrame>& GetRecordedGhostFrames();
+
+    UPROPERTY()
+    UNiagaraComponent* ThrottleParticles;
+
+    UPROPERTY()
+    UNiagaraComponent* WheelLBParticles;
+
+    UPROPERTY()
+    UNiagaraComponent* WheelRBParticles;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bIsGhost = false;
