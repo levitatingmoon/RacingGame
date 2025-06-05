@@ -33,10 +33,11 @@ public:
     int LapLimit = 1;
     int CurrentLap = 1;
     bool bRaceOver = false;
-    float RaceTime = 0.f;
+    float RaceTime = 0.0f;
 
     bool bIsQuali = false;
     bool bIsRace = false;
+    bool bIsGhostCar = false;
 
     int NrOfSectors = 0;
  

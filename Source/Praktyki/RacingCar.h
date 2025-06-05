@@ -4,7 +4,9 @@
 #include "GameFramework/Pawn.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GhostFrame.h"
 #include "RacingCar.generated.h"
+
 
 class APraktykiGameModeBase;
 class URaceWidget;
@@ -14,6 +16,8 @@ class UMainMenuWidget;
 class ARacingCarMovementComponent;
 class AMyPlayerController;
 class AStartingSpot;
+class AGhostCar;
+
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPenaltyUpdated, float, Penalty);
 
@@ -38,14 +42,28 @@ private:
         FName("wheel_back_left_spin")
     };
 
+    TArray<FGhostFrame> CurrentLapFrames;
+
+    float RecordingInterval = 0.33f; //30 FPS
+    float RecordingTimer = 0.0f;
+    bool bRecordingGhost = false;
+
+    UPROPERTY()
+    AGhostCar* LastGhost = nullptr;
+
 public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-    FString FormatTime(float TimeSeconds, bool bMilliseconds);
     
     void SuspensionWheelForce();
     void SteerForce();
+
+    void StartGhostRecording();
+    void StopGhostRecording();
+    TArray<FGhostFrame>& GetRecordedGhostFrames();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bIsGhost = false;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
     float GripFactor = 1.0f;
@@ -55,12 +73,17 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnPenaltyUpdated OnPenaltyUpdated;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
+    TSubclassOf<AGhostCar> GhostCarClass;
+
 
     void Throttle(float Val);
     void Steer(float Val);
     void StopCar();
     void StartCar();
     void PrepareForRace();
+
+    void OnLapCompleted();
 
     void UseBehindCamera();
     void UseInsideCamera();

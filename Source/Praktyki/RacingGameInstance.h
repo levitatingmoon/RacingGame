@@ -24,5 +24,7 @@ public:
 	UPROPERTY()
 	int MaterialIndex = 3;
 
+	UPROPERTY()
+	bool bGhostCar = false;
 	
 };

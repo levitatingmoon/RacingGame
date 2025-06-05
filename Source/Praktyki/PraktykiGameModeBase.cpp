@@ -141,6 +141,7 @@ void APraktykiGameModeBase::GetInstanceValues()
     {
         MaxQualiTime = GameInstance->TimeLimitValue;
         LapLimit = GameInstance->LapLimitValue;
+        bIsGhostCar = GameInstance->bGhostCar;
     }
 }
 

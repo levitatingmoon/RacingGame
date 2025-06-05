@@ -10,6 +10,7 @@ class UTextBlock;
 class USlider;
 class UButton;
 class ARacingCar;
+class UCheckBox;
 
 /**
  * 
@@ -56,6 +57,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* DefaultMaterialButton;
 
+	UPROPERTY(meta = (BindWidget))
+	UCheckBox* GhostCarCheckbox;
+
 	float TimeLimitSliderDefault = 300.0f;
 
 	int LapLimitSliderDefault = 10;
@@ -86,6 +90,9 @@ public:
 
 	UFUNCTION()
 	void OnDefaultClicked();
+
+	UFUNCTION()
+	void OnGhostCarCheckboxToggled(bool bIsChecked);
 
 	UPROPERTY(BlueprintReadWrite)
 	ARacingCar* OwningRacingCar;

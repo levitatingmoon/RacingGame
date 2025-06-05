@@ -5,6 +5,7 @@
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/CheckBox.h"
 #include "RacingGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -57,6 +58,10 @@ void UMainMenuWidget::NativeConstruct()
     if (GreenMaterialButton)
     {
         GreenMaterialButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnGreenClicked);
+    }
+    if (GhostCarCheckbox)
+    {
+        GhostCarCheckbox->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::OnGhostCarCheckboxToggled);
     }
 }
 
@@ -145,4 +150,13 @@ void UMainMenuWidget::OnDefaultClicked()
     {
         GameInstance->MaterialIndex = 3;
     }
+}
+
+void UMainMenuWidget::OnGhostCarCheckboxToggled(bool bIsChecked)
+{
+    if (URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GetWorld()->GetGameInstance()))
+    {
+        GameInstance->bGhostCar = bIsChecked;
+    }
+
 }

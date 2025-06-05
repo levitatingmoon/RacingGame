@@ -234,12 +234,21 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
             Car->SectorStartTime = TimerTime;
             Car->bStartedFirstLap = true;
             Car->bFirstLap = true;
+            if (GameMode->bIsGhostCar)
+            {
+                Car->StartGhostRecording();
+            }
+            
 
             RaceWidget->Laps->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Car->StartedLaps, GameMode->LapLimit)));
         }
         //End of Lap
         else if (Car->PreviousSectorNumber == Car->NumberOfSectors - 1)
         {
+            if (GameMode->bIsGhostCar)
+            {
+                Car->OnLapCompleted();
+            }
             Car->bFirstLap = false;
             //End of lap, so the last sector ends here
             Car->CurrentSectorTimes[Car->NumberOfSectors - 1] = TimerTime - Car->SectorStartTime;
@@ -399,6 +408,10 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
         {
             Car->PreviousSectorNumber = Index;
         }
+    }
+    if (Car->StartedLaps == GameMode->LapLimit && GameMode->bIsGhostCar)
+    {
+        Car->StopGhostRecording();
     }
 
     if (Car->StartedLaps > GameMode->LapLimit && !Car->bRaceEnded && GameMode->bIsRace)

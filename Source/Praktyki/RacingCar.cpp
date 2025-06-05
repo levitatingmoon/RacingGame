@@ -10,6 +10,7 @@
 #include "MyPlayerController.h"
 #include "RacingGameInstance.h"
 #include "StartingSpot.h"
+#include "GhostCar.h"
 
 
 ARacingCar::ARacingCar()
@@ -66,8 +67,18 @@ void ARacingCar::Tick(float DeltaTime)
 
     if (!bIsStopped)
     {
-        SuspensionWheelForce();
 
+        if (bRecordingGhost)
+        {
+            RecordingTimer += DeltaTime;
+            while (RecordingTimer >= RecordingInterval)
+            {
+                RecordingTimer -= RecordingInterval;
+                CurrentLapFrames.Add(FGhostFrame(GetActorLocation(), GetActorRotation()));
+            }
+        }
+
+        SuspensionWheelForce();
         
         FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
         FVector ForwardVector = CarSkeletalMesh->GetForwardVector();
@@ -208,6 +219,43 @@ void ARacingCar::PrepareForRace()
 
 }
 
+void ARacingCar::OnLapCompleted()
+{
+    TArray<FGhostFrame> FinishedLapFrames = CurrentLapFrames;
+    UE_LOG(LogTemp, Warning, TEXT("Recorded %d frames, total time: %.2f"), CurrentLapFrames.Num(), RecordingInterval * CurrentLapFrames.Num());
+
+    CurrentLapFrames.Empty();
+    RecordingTimer = 0.0f;
+
+    if (LastGhost)
+    {
+        LastGhost->Destroy();
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    FVector SpawnLoc = FinishedLapFrames.Num() > 0 ? FinishedLapFrames[0].Location : GetActorLocation();
+    FRotator SpawnRot = FinishedLapFrames.Num() > 0 ? FinishedLapFrames[0].Rotation : GetActorRotation();
+    
+    if (!bIsGhost)
+    {
+        AGhostCar* NewGhost = GetWorld()->SpawnActor<AGhostCar>(GhostCarClass, SpawnLoc, SpawnRot, SpawnParams);
+
+        if (NewGhost)
+        {
+            NewGhost->AutoPossessPlayer = EAutoReceiveInput::Disabled;
+            NewGhost->AutoPossessAI = EAutoPossessAI::Disabled;
+            NewGhost->CarSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            NewGhost->LoadGhostData(FinishedLapFrames);
+            NewGhost->StartGhostPlayback();
+            LastGhost = NewGhost;
+        }
+    }
+    
+
+}
+
 void ARacingCar::GetAllLiveryMeshes()
 {
     TArray<USceneComponent*> AllChildrenComponents;
@@ -273,20 +321,6 @@ void ARacingCar::UpdateFOV()
         HoodCamera->SetFieldOfView(NewFOV);
     }
     
-}
-
-FString ARacingCar::FormatTime(float TimeSeconds, bool bMilliseconds)
-{
-    int32 TotalMilliseconds = FMath::RoundToInt(TimeSeconds * 1000.0f);
-    int32 Minutes = TotalMilliseconds / 60000;
-    int32 Seconds = (TotalMilliseconds % 60000) / 1000;
-    if (bMilliseconds) 
-    {
-        int32 Milliseconds = TotalMilliseconds % 1000;
-        return FString::Printf(TEXT("%02d:%02d:%03d"), Minutes, Seconds, Milliseconds);
-    }
-
-    return FString::Printf(TEXT("%02d:%02d"), Minutes, Seconds);
 }
 
 void ARacingCar::SuspensionWheelForce()
@@ -413,4 +447,21 @@ void ARacingCar::SteerForce()
 
         
     }
+}
+
+void ARacingCar::StartGhostRecording()
+{
+    bRecordingGhost = true;
+    RecordingTimer = 0.0f;
+    CurrentLapFrames.Empty();
+}
+
+void ARacingCar::StopGhostRecording()
+{
+    bRecordingGhost = false;
+}
+
+TArray<FGhostFrame>& ARacingCar::GetRecordedGhostFrames()
+{
+    return CurrentLapFrames;
 }
