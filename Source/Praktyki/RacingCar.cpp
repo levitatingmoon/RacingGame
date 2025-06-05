@@ -371,39 +371,40 @@ void ARacingCar::SuspensionWheelForce()
             {
                 WheelsOffTrack += 1;
 
-                if (PhysMat->SurfaceType == SURFACE_Gravel)
+            }
+
+            if (PhysMat && PhysMat->SurfaceType == SURFACE_Gravel)
+            {
+                if (Bone == WheelBones[2])
                 {
-                    if (Bone == WheelBones[2])
+                    if (!bPreviousGravelRB)
                     {
-                        FString Msg = FString::Printf(TEXT("ACTIVE RIGHT"));
-                        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Msg);
                         WheelRBParticles->Activate(true);
-                        //bPreviousGravelRB = true;
-
+                        bPreviousGravelRB = true;
                     }
+                }
 
-                    if (Bone == WheelBones[3])
+                if (Bone == WheelBones[3])
+                {
+                    if (!bPreviousGravelLB)
                     {
-                        FString Msg = FString::Printf(TEXT("ACTIVE LEFT"));
-                        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Msg);
                         WheelLBParticles->Activate(true);
-                        //bPreviousGravelLB = true;
+                        bPreviousGravelLB = true;
                     }
                 }
             }
-
-            if (PhysMat && PhysMat->SurfaceType != SURFACE_Gravel)
+            else
             {
                 if (Bone == WheelBones[2] && bPreviousGravelRB)
                 {
-                    WheelRBParticles->Activate(false);
+                    WheelRBParticles->Deactivate();
                     bPreviousGravelRB = false;
                 }
 
                 if (Bone == WheelBones[3] && bPreviousGravelLB)
                 {
-                    WheelLBParticles->Activate(false);
-                    bPreviousGravelRB = false;
+                    WheelLBParticles->Deactivate();
+                    bPreviousGravelLB = false;
                 }
             }
 
@@ -419,7 +420,7 @@ void ARacingCar::SuspensionWheelForce()
 
             //SteerForce(Bone);
 
-            DrawDebugLine(GetWorld(), Start, Start + (springDir * force)/10000.0f, FColor::Blue, false, 2.0f, 0, 2.0f);
+            //DrawDebugLine(GetWorld(), Start, Start + (springDir * force)/10000.0f, FColor::Blue, false, 2.0f, 0, 2.0f);
         }
 
     }
@@ -473,7 +474,7 @@ void ARacingCar::SteerForce()
             }
             //UE_LOG(LogTemp, Warning, TEXT("FORCE: %f %f %f"), LateralSteeringForce.X, LateralSteeringForce.Y, LateralSteeringForce.Z);
 
-            DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + LateralSteeringForce * 0.01f, FColor::Green, false, 0.1f, 0, 2.0f);
+            //DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + LateralSteeringForce * 0.01f, FColor::Green, false, 0.1f, 0, 2.0f);
         
         }
         
@@ -490,7 +491,7 @@ void ARacingCar::SteerForce()
         {
             CarSkeletalMesh->AddForceAtLocation(GripForce, CarSkeletalMesh->GetBoneLocation(Bone));
         }
-        DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + GripForce * 0.01f, FColor::Red, false, 0.1f, 0, 2.0f);
+        //DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + GripForce * 0.01f, FColor::Red, false, 0.1f, 0, 2.0f);
 
         
     }
