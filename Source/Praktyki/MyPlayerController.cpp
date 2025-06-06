@@ -276,10 +276,12 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
                         FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
                         if (TimeDifference < 0.0f)
                         {
+                            RaceWidget->SectorTimeDifference->SetColorAndOpacity(FLinearColor::Green);
                             RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
                         }
                         else
                         {
+                            RaceWidget->SectorTimeDifference->SetColorAndOpacity(FLinearColor::Yellow);
                             RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
                         }
                         RaceWidget->ShowSectorDifference();
@@ -301,10 +303,12 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
                         FString TimeDifferenceString = FormatTime(FMath::Abs(TimeDifference), true);
                         if (TimeDifference < 0.0f)
                         {
+                            RaceWidget->SectorTimeDifference->SetColorAndOpacity(FLinearColor::Green);
                             RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("-%s"), *TimeDifferenceString)));
                         }
                         else
                         {
+                            RaceWidget->SectorTimeDifference->SetColorAndOpacity(FLinearColor::Yellow);
                             RaceWidget->SectorTimeDifference->SetText(FText::FromString(FString::Printf(TEXT("+%s"), *TimeDifferenceString)));
                         }
                         RaceWidget->ShowSectorDifference();

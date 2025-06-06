@@ -50,7 +50,8 @@ void URaceWidget::CreateSectorBox()
 
 void URaceWidget::UpdateSectorBox()
 {
-
+	FString Msg = FString::Printf(TEXT("UPDATE SECTOR BOX"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
 	GetWorld()->GetTimerManager().SetTimer(SectorColourTimer, this, &URaceWidget::ResetSectorBoxes, 2.0f, false);
 
 }

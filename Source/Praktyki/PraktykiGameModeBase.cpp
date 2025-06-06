@@ -66,8 +66,8 @@ void APraktykiGameModeBase::QualiEnd()
         AMyPlayerController* PC = Cast<AMyPlayerController>(Car->GetController());
         if (PC)
         {
-            Car->PrepareForRace();
             PC->ResetForRace();
+            Car->PrepareForRace();
             PC->StartRaceCountdown();
         }
 
