@@ -67,6 +67,7 @@ void APraktykiGameModeBase::QualiEnd()
         if (PC)
         {
             Car->PrepareForRace();
+            PC->ResetForRace();
             PC->StartRaceCountdown();
         }
 

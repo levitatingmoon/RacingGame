@@ -101,7 +101,27 @@ public:
 
     void HidePenalty();
 
+    void ResetForRace();
 
+private:
+
+    TArray<float> CurrentSectorTimes;
+    TArray<float> PreviousBestSectorTimes;
+    TArray<float> BestSectorTimes;
+    TArray<float> LapTimes;
+
+    int NumberOfSectors = 0;
+    float PreviousLapTime;
+    float BestRaceLap;
+    float BestQualiLap = 0.0f;
+    float StartLapTime;
+    float SectorStartTime;
+    float RaceTime;
+    int PreviousSectorNumber = 0;
+    int StartedLaps = 1;
+    bool bRaceEnded = false;
+    bool bStartedFirstLap = false;
+    bool bFirstLap = false;
 
 	
 };

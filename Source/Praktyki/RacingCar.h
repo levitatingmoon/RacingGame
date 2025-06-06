@@ -77,9 +77,6 @@ public:
     UPROPERTY()
     UNiagaraComponent* WheelRBParticles;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bIsGhost = false;
-
     UPROPERTY(EditAnywhere, Category = "Physics")
     float GripFactor = 1.0f;
     UPROPERTY(EditAnywhere, Category = "Physics")
@@ -105,28 +102,13 @@ public:
     void UseHoodCamera();
     UCameraComponent* FindCameraByName(FName CameraName);
 
-    TArray<float> CurrentSectorTimes;
-    TArray<float> PreviousBestSectorTimes;
-    TArray<float> BestSectorTimes;
-    TArray<float> LapTimes;
 
-    int NumberOfSectors = 0;
-    float PreviousLapTime;
-    float BestRaceLap;
-    float BestQualiLap = 0.0f;
-    float StartLapTime;
-    float SectorStartTime;
-    float RaceTime;
-    float Penalty;
-    int PreviousSectorNumber = 0;
-    int StartedLaps = 1;
-    bool bRaceEnded = false;
-    bool bStartedFirstLap = false;
-    bool bFirstLap = false;
 
     bool bWasOffTrack = false;
     bool bThisLapPenalty = false;
     bool bPreviousLapPenalty = false;
+
+    float Penalty;
 
     FVector2D ThrottleInput;
     float SteerInput;

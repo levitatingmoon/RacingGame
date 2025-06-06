@@ -41,20 +41,6 @@ void ARacingCar::BeginPlay()
     FVector CenterOfMassOffset = FVector(0.f, 0.f, -200.f);
     CarSkeletalMesh->SetCenterOfMass(CenterOfMassOffset);
 
-    GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
-    NumberOfSectors = GameMode->SectorNumber;
-
-    CurrentSectorTimes.SetNum(NumberOfSectors);
-    BestSectorTimes.SetNum(NumberOfSectors);
-    PreviousBestSectorTimes.SetNum(NumberOfSectors);
-
-    for (int i = 0; i < NumberOfSectors; i++)
-    {
-        BestSectorTimes[i] = FLT_MAX;
-        PreviousBestSectorTimes[i] = FLT_MAX;
-        CurrentSectorTimes[i] = 0.0f;
-    }
-
     GetAllLiveryMeshes();
     CurrentMaterial = TargetMaterial;
 
@@ -220,11 +206,6 @@ void ARacingCar::StartCar()
 
 void ARacingCar::PrepareForRace()
 {
-    StartedLaps = 1;
-    SectorStartTime = 0;
-    PreviousSectorNumber = 0;
-    PreviousLapTime = 0;
-    StartLapTime = 0;
     Penalty = 0.0f;
 
     SetActorLocationAndRotation(StartingSpot->GetActorLocation(),StartingSpot->GetActorRotation(),false,nullptr,ETeleportType::TeleportPhysics);
@@ -250,19 +231,16 @@ void ARacingCar::OnLapCompleted()
     FVector SpawnLoc = FinishedLapFrames.Num() > 0 ? FinishedLapFrames[0].Location : GetActorLocation();
     FRotator SpawnRot = FinishedLapFrames.Num() > 0 ? FinishedLapFrames[0].Rotation : GetActorRotation();
     
-    if (!bIsGhost)
-    {
-        AGhostCar* NewGhost = GetWorld()->SpawnActor<AGhostCar>(GhostCarClass, SpawnLoc, SpawnRot, SpawnParams);
+    AGhostCar* NewGhost = GetWorld()->SpawnActor<AGhostCar>(GhostCarClass, SpawnLoc, SpawnRot, SpawnParams);
 
-        if (NewGhost)
-        {
-            NewGhost->AutoPossessPlayer = EAutoReceiveInput::Disabled;
-            NewGhost->AutoPossessAI = EAutoPossessAI::Disabled;
-            NewGhost->CarSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-            NewGhost->LoadGhostData(FinishedLapFrames);
-            NewGhost->StartGhostPlayback();
-            LastGhost = NewGhost;
-        }
+    if (NewGhost)
+    {
+        NewGhost->AutoPossessPlayer = EAutoReceiveInput::Disabled;
+        NewGhost->AutoPossessAI = EAutoPossessAI::Disabled;
+        NewGhost->CarSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        NewGhost->LoadGhostData(FinishedLapFrames);
+        NewGhost->StartGhostPlayback();
+        LastGhost = NewGhost;
     }
     
 
