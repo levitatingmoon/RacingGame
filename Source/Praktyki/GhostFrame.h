@@ -20,8 +20,6 @@ struct FGhostFrame
     UPROPERTY()
     FRotator Rotation;
 
-    FGhostFrame() {}
-    FGhostFrame(FVector InLoc, FRotator InRot)
-        : Location(InLoc), Rotation(InRot) {
-    }
+    FGhostFrame() : Location(FVector::ZeroVector), Rotation(FRotator::ZeroRotator) {}
+    FGhostFrame(FVector InLoc, FRotator InRot) : Location(InLoc), Rotation(InRot) {}
 };
