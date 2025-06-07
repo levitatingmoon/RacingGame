@@ -46,8 +46,6 @@ private:
 
     FName SteeringWheelBone = "";
 
-    UAudioComponent* EngineSound;
-
     TArray<FGhostFrame> CurrentLapFrames;
 
     float RecordingInterval = 0.33f; //30 FPS
@@ -72,6 +70,8 @@ public:
     void StartGhostRecording();
     void StopGhostRecording();
     TArray<FGhostFrame>& GetRecordedGhostFrames();
+
+    UAudioComponent* EngineSound;
 
     UPROPERTY()
     UNiagaraComponent* ThrottleParticles;

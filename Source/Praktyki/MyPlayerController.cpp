@@ -11,6 +11,7 @@
 #include "PraktykiGameModeBase.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/AudioComponent.h"
 
 void AMyPlayerController::BeginPlay()
 {
@@ -212,6 +213,7 @@ void AMyPlayerController::GetEndRaceStatistics()
 {
     RemoveRaceWidget();
     AddEndRaceWidget();
+    Car->EngineSound->Stop();
 
     //ARacingCar* Car = Cast<ARacingCar>(GetPawn());
     //APraktykiGameModeBase* GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
@@ -474,11 +476,19 @@ void AMyPlayerController::StartRaceCountdown()
 void AMyPlayerController::LightOn(int LightIndex)
 {
     //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("LIGHT ON"));
+    if (StartRaceWidget->LightOnSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, StartRaceWidget->LightOnSound, Car->GetActorLocation());
+    }
     StartRaceWidget->SetLightColour(LightIndex, FLinearColor::Red);
 }
 
 void AMyPlayerController::LightsOut()
 {
+    if (StartRaceWidget->LightsOffSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, StartRaceWidget->LightsOffSound, Car->GetActorLocation());
+    }
     StartRaceWidget->SetLightColour(0, FLinearColor::Black);
     StartRaceWidget->SetLightColour(1, FLinearColor::Black);
     StartRaceWidget->SetLightColour(2, FLinearColor::Black);
@@ -520,6 +530,7 @@ void AMyPlayerController::HidePenalty()
 
 void AMyPlayerController::ResetForRace()
 {
+    Car->EngineSound->Stop();
     StartedLaps = 1;
     SectorStartTime = 0;
     PreviousSectorNumber = 0;

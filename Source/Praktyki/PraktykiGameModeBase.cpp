@@ -117,7 +117,7 @@ void APraktykiGameModeBase::LightSequence()
         {
             PC->LightOn(CurrentLight);
         }
-        //Car->LightOn(CurrentLight);
+
         CurrentLight++;
         if (CurrentLight < LightsNumber)
         {

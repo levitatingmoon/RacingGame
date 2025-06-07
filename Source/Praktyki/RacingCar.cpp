@@ -147,20 +147,25 @@ void ARacingCar::Throttle(float Val)
 
         if (EngineSound)
         {
-            if (ThrottleInput.X > 0.f)
+            if (ThrottleInput.X > 0.1f)
             {
                 if (!EngineSound->IsPlaying())
                 {
                     EngineSound->Play();
                 }
-                EngineSound->SetVolumeMultiplier(ThrottleInput.X);
+                EngineSound->SetVolumeMultiplier(1.0f);
+            }
+            else if (ThrottleInput.X < -0.1f)
+            {
+                if (!EngineSound->IsPlaying())
+                {
+                    EngineSound->Play();
+                }
+                EngineSound->SetVolumeMultiplier(0.3f);
             }
             else
             {
-                if (EngineSound->IsPlaying())
-                {
-                    EngineSound->Stop();
-                }
+                EngineSound->Stop();
             }
         }
 

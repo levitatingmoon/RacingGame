@@ -31,6 +31,12 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UImage* Light5;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* LightOnSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* LightsOffSound;
+
 	UImage* GetLightByIndex(int32 Index);
 
 	void SetLightColour(int32 Index, FLinearColor Colour);
