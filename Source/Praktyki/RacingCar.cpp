@@ -14,6 +14,8 @@
 #include "NiagaraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/AudioComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 
 
 ARacingCar::ARacingCar()
@@ -60,6 +62,15 @@ void ARacingCar::BeginPlay()
         {
             EngineSound = AudioComponent;
             break;
+        }
+    }
+
+    if (AMyPlayerController* PC = Cast<AMyPlayerController>(GetController()))
+    {
+        if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
+            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
+        {
+            Subsystem->AddMappingContext(IMC_CarControls, 0);
         }
     }
 }
@@ -130,19 +141,24 @@ void ARacingCar::Tick(float DeltaTime)
 void ARacingCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
-    PlayerInputComponent->BindAxis("Throttle", this, &ARacingCar::Throttle);
-    PlayerInputComponent->BindAxis("Steer", this, &ARacingCar::Steer);
 
-    PlayerInputComponent->BindAction("BehindCamera", IE_Pressed, this, &ARacingCar::UseBehindCamera);
-    PlayerInputComponent->BindAction("InsideCamera", IE_Pressed, this, &ARacingCar::UseInsideCamera);
-    PlayerInputComponent->BindAction("HoodCamera", IE_Pressed, this, &ARacingCar::UseHoodCamera);
+    if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) 
+    {
+        EnhancedInputComponent->BindAction(IA_Throttle, ETriggerEvent::Triggered, this, &ARacingCar::Throttle);
+        EnhancedInputComponent->BindAction(IA_Steer, ETriggerEvent::Triggered, this, &ARacingCar::Steer);
+
+        EnhancedInputComponent->BindAction(IA_BehindCamera, ETriggerEvent::Triggered, this, &ARacingCar::UseBehindCamera);
+        EnhancedInputComponent->BindAction(IA_InsideCamera, ETriggerEvent::Triggered, this, &ARacingCar::UseInsideCamera);
+        EnhancedInputComponent->BindAction(IA_HoodCamera, ETriggerEvent::Triggered, this, &ARacingCar::UseHoodCamera);
+    }
 }
 
-void ARacingCar::Throttle(float Val)
+void ARacingCar::Throttle(const FInputActionValue& Value)
 {
 
     if (!bIsStopped)
     {
+        float Val = Value.Get<float>();
         ThrottleInput.X = FMath::Clamp(Val, -1.f, 1.f);
 
         if (EngineSound)
@@ -178,10 +194,11 @@ void ARacingCar::Throttle(float Val)
     }
 }
 
-void ARacingCar::Steer(float Val)
+void ARacingCar::Steer(const FInputActionValue& Value)
 {
     if (!bIsStopped)
     {
+        float Val = Value.Get<float>();
         //UE_LOG(LogTemp, Warning, TEXT("Steer input: %f"), Val);
         SteerInput = FMath::Clamp(Val, -1.f, 1.f);
 

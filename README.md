@@ -15,7 +15,7 @@
 - [x] Sector times
 - [x] UI with race data (current laptime, best laptime, sector times, sector time delta)
 - [x] Race start UI
-- [] Surface friction
-- [] Sounds
+- [] Surface friction (different friction depending on surface)
+- [x] Sounds
 - [x] VFX (Exhaust flame, clouds of gravel)
 - [] Controller input

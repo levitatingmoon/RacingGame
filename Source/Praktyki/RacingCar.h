@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GhostFrame.h"
+#include "EnhancedInputComponent.h"
 #include "RacingCar.generated.h"
 
 
@@ -94,8 +95,8 @@ public:
     TSubclassOf<AGhostCar> GhostCarClass;
 
 
-    void Throttle(float Val);
-    void Steer(float Val);
+    void Throttle(const FInputActionValue& Value);
+    void Steer(const FInputActionValue& Value);
     void StopCar();
     void StartCar();
     void PrepareForRace();
@@ -208,5 +209,24 @@ public:
     AStartingSpot* StartingSpot;
 
     void UpdateFOV();
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    class UInputMappingContext* IMC_CarControls;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    class UInputAction* IA_Throttle;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    class UInputAction* IA_Steer;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    class UInputAction* IA_BehindCamera;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    class UInputAction* IA_InsideCamera;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    class UInputAction* IA_HoodCamera;
 
 };
