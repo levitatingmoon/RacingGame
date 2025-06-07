@@ -12,14 +12,14 @@
 #include "StartingSpot.h"
 #include "GhostCar.h"
 #include "NiagaraComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/AudioComponent.h"
 
 
 ARacingCar::ARacingCar()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    //MovementComponent = CreateDefaultSubobject<URacingCarMovementComponent>(TEXT("MovementComponent"));
-    //MovementComponent->SetUpdatedComponent(RootComponent);
 }
 
 void ARacingCar::BeginPlay()
@@ -48,6 +48,20 @@ void ARacingCar::BeginPlay()
     URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GI);
 
     ChangeMeshMaterial(GameInstance->MaterialIndex);
+
+    TArray<UActorComponent*> AudioComponents;
+
+    GetComponents(UAudioComponent::StaticClass(), AudioComponents);
+
+    for (UActorComponent* Audio : AudioComponents)
+    {
+        UAudioComponent* AudioComponent = Cast<UAudioComponent>(Audio);
+        if (AudioComponent && AudioComponent->GetName() == TEXT("EngineSound"))
+        {
+            EngineSound = AudioComponent;
+            break;
+        }
+    }
 }
 
 void ARacingCar::Tick(float DeltaTime)
@@ -129,8 +143,26 @@ void ARacingCar::Throttle(float Val)
 
     if (!bIsStopped)
     {
-        //UE_LOG(LogTemp, Warning, TEXT("Throttle input: %f"), Val);
         ThrottleInput.X = FMath::Clamp(Val, -1.f, 1.f);
+
+        if (EngineSound)
+        {
+            if (ThrottleInput.X > 0.f)
+            {
+                if (!EngineSound->IsPlaying())
+                {
+                    EngineSound->Play();
+                }
+                EngineSound->SetVolumeMultiplier(ThrottleInput.X);
+            }
+            else
+            {
+                if (EngineSound->IsPlaying())
+                {
+                    EngineSound->Stop();
+                }
+            }
+        }
 
         if (PreviousThrottleValue <= 0.0f && Val > 0.1f && ThrottleParticles)
         {
@@ -139,7 +171,6 @@ void ARacingCar::Throttle(float Val)
 
         PreviousThrottleValue = Val;
     }
-
 }
 
 void ARacingCar::Steer(float Val)
@@ -148,6 +179,11 @@ void ARacingCar::Steer(float Val)
     {
         //UE_LOG(LogTemp, Warning, TEXT("Steer input: %f"), Val);
         SteerInput = FMath::Clamp(Val, -1.f, 1.f);
+
+        float MaxSteerAngle = 60.0f;
+
+        FRotator Rotation = FRotator(0.f, 0.f, SteerInput * MaxSteerAngle);
+
     }
 
 }
@@ -228,8 +264,19 @@ void ARacingCar::OnLapCompleted()
     FActorSpawnParameters SpawnParams;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    FVector SpawnLoc = FinishedLapFrames.Num() > 0 ? FinishedLapFrames[0].Location : GetActorLocation();
-    FRotator SpawnRot = FinishedLapFrames.Num() > 0 ? FinishedLapFrames[0].Rotation : GetActorRotation();
+    FVector SpawnLoc;
+    FRotator SpawnRot;
+
+    if (FinishedLapFrames.Num() > 0)
+    {
+        SpawnLoc = FinishedLapFrames[0].Location;
+        SpawnRot = FinishedLapFrames[0].Rotation;
+    }
+    else
+    {
+        SpawnLoc = GetActorLocation();
+        SpawnRot = GetActorRotation();
+    }
     
     AGhostCar* NewGhost = GetWorld()->SpawnActor<AGhostCar>(GhostCarClass, SpawnLoc, SpawnRot, SpawnParams);
 

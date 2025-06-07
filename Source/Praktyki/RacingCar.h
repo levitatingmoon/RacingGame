@@ -18,6 +18,7 @@ class AMyPlayerController;
 class AStartingSpot;
 class AGhostCar;
 class UNiagaraComponent;
+class UAudioComponent;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPenaltyUpdated, float, Penalty);
@@ -42,6 +43,10 @@ private:
         FName("wheel_back_right_spin"),
         FName("wheel_back_left_spin")
     };
+
+    FName SteeringWheelBone = "";
+
+    UAudioComponent* EngineSound;
 
     TArray<FGhostFrame> CurrentLapFrames;
 
