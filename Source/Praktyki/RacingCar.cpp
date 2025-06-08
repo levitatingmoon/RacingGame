@@ -96,12 +96,13 @@ void ARacingCar::Tick(float DeltaTime)
         UpdateSteeringWheel(DeltaTime);
         SuspensionWheelForce();
         
+        
         FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
         FVector ForwardVector = CarSkeletalMesh->GetForwardVector();
         FVector RightVector = CarSkeletalMesh->GetRightVector();
 
         float SidewaysSpeed = FVector::DotProduct(Velocity, RightVector);
-        FVector SidewaysFrictionForce = -RightVector * SidewaysSpeed * SidewaysFrictionStrength;
+        FVector SidewaysFrictionForce = -RightVector * SidewaysSpeed * SidewaysFrictionStrength * SurfaceFriction;
         CarSkeletalMesh->AddForce(SidewaysFrictionForce);
 
         //Slowing down when no input
@@ -119,21 +120,54 @@ void ARacingCar::Tick(float DeltaTime)
             float SpeedRatio = FMath::Clamp(Speed / MaxSpeed, 0.f, 1.f);
             float ForceScale = 1.f - SpeedRatio;
 
-            FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale;
-            CarSkeletalMesh->AddForce(Force);
+            //float SurfaceThrottleFactor = FMath::Clamp(1.f / SurfaceFriction, 0.1f, 1.f);
+            //float SurfaceThrottleFactor = FMath::Clamp(FMath::Pow(1.f / SurfaceFriction, 1.5f), 0.05f, 1.f);
+
+
+            //FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale * SurfaceThrottleFactor;
+            //CarSkeletalMesh->AddForce(Force);
+
+            float InputX = ThrottleInput.X;
+            FString DebugForce = FString::Printf(TEXT("InputX: %.3f"), InputX);
+            GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, DebugForce);
+
+            //Acceleration
+            if (InputX > 0.0f || (InputX < 0.0f && ForwardSpeed <= 0.0f))
+            {
+                float SurfaceThrottleFactor = FMath::Clamp(FMath::Pow(1.f / SurfaceFriction, 1.5f), 0.05f, 1.f);
+                FVector Force = ForwardVector * InputX * MoveForce * ForceScale * SurfaceThrottleFactor;
+                DebugForce = FString::Printf(TEXT("Throttle Force: %.1f"), Force.Size());
+                GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, DebugForce);
+                CarSkeletalMesh->AddForce(Force);
+            }
+            //Braking
+            else if(InputX < 0.0f && ForwardSpeed > 0.0f)
+            {
+                float BrakingFactor = FMath::Clamp(SurfaceFriction * 1.5f, 1.f, 5.f);
+                FVector BrakingForce = ForwardVector * InputX * BrakeForce * ForceScale * BrakingFactor;
+
+                FString DebugBrake = FString::Printf(TEXT("Braking Force: %.1f"), BrakingForce.Size());
+                GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, DebugBrake);
+                CarSkeletalMesh->AddForce(BrakingForce);
+            }
+            //Reverse
+            else if (InputX < 0.0f && Speed < 10.0f)
+            {
+
+            }
+
 
         }
+
+        FString FrictionText = FString::Printf(TEXT("Surface Friction: %.2f"), SurfaceFriction);
+        GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FrictionText);
 
         
         if (FMath::Abs(SteerInput) > 0.01f)
         {
             FVector Torque = FVector(0.f, 0.f, 1.f) * SteerInput * TurnTorque;
             CarSkeletalMesh->AddTorqueInRadians(Torque);
-
-            //SteerForce();
         }
-
-        //SteerForce();
         
     }
 }
@@ -145,7 +179,9 @@ void ARacingCar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
     if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) 
     {
         EnhancedInputComponent->BindAction(IA_Throttle, ETriggerEvent::Triggered, this, &ARacingCar::Throttle);
+        EnhancedInputComponent->BindAction(IA_Throttle, ETriggerEvent::Completed, this, &ARacingCar::ThrottleCompleted);
         EnhancedInputComponent->BindAction(IA_Steer, ETriggerEvent::Triggered, this, &ARacingCar::Steer);
+        EnhancedInputComponent->BindAction(IA_Steer, ETriggerEvent::Completed, this, &ARacingCar::SteerCompleted);
 
         EnhancedInputComponent->BindAction(IA_BehindCamera, ETriggerEvent::Triggered, this, &ARacingCar::UseBehindCamera);
         EnhancedInputComponent->BindAction(IA_InsideCamera, ETriggerEvent::Triggered, this, &ARacingCar::UseInsideCamera);
@@ -194,6 +230,11 @@ void ARacingCar::Throttle(const FInputActionValue& Value)
     }
 }
 
+void ARacingCar::ThrottleCompleted(const FInputActionValue& Value)
+{
+    ThrottleInput.X = 0.f;
+}
+
 void ARacingCar::Steer(const FInputActionValue& Value)
 {
     if (!bIsStopped)
@@ -216,6 +257,11 @@ void ARacingCar::Steer(const FInputActionValue& Value)
 
     }
 
+}
+
+void ARacingCar::SteerCompleted(const FInputActionValue& Value)
+{
+    SteerInput = 0.f;
 }
 
 void ARacingCar::UpdateSteeringWheel(float DeltaTime)
@@ -427,6 +473,7 @@ void ARacingCar::SuspensionWheelForce()
 {
     int WheelsOffTrack = 0;
     bool bIsOffTrack = false;
+    SurfaceFriction = 0.0f;
     for (const FName& Bone : WheelBones)
     {
 
@@ -509,9 +556,20 @@ void ARacingCar::SuspensionWheelForce()
             //SteerForce(Bone);
 
             //DrawDebugLine(GetWorld(), Start, Start + (springDir * force)/10000.0f, FColor::Blue, false, 2.0f, 0, 2.0f);
+            if (PhysMat)
+            {
+                SurfaceFriction += PhysMat->Friction;
+            }
+            else
+            {
+                SurfaceFriction = 4.0f;
+            }
+            
         }
 
     }
+
+    SurfaceFriction = SurfaceFriction / 4.0f;
 
     if (WheelsOffTrack == 4)
     {

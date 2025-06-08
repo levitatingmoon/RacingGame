@@ -71,6 +71,8 @@ private:
 
     bool bIsStopped = false;
 
+    float SurfaceFriction = 1.0f;
+
     UPROPERTY()
     AGhostCar* LastGhost = nullptr;
 
@@ -98,7 +100,9 @@ private:
     void SteerForce();
 
     void Throttle(const FInputActionValue& Value);
+    void ThrottleCompleted(const FInputActionValue& Value);
     void Steer(const FInputActionValue& Value);
+    void SteerCompleted(const FInputActionValue& Value);
 
     void UpdateSteeringWheel(float DeltaTime);
 
@@ -142,18 +146,20 @@ public:
     UPROPERTY()
     USkeletalMeshComponent* CarSkeletalMesh;
 
+    UPROPERTY(EditAnywhere, Category = "Physics")
+    float MoveForce = 2000000.0f;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
-    float MoveForce = 100000.f;
+    float BrakeForce = 1000000.0f;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
-    float TurnTorque = 500000.f;
+    float TurnTorque = 450000.f;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
     float MaxSpeed = 3000.f;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
-    float SidewaysFrictionStrength = 800.f;
+    float SidewaysFrictionStrength = 1200.f;
 
     UPROPERTY(EditAnywhere, Category = "Physics")
     float ForwardFrictionStrength = 300.f;
