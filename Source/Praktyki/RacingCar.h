@@ -100,6 +100,8 @@ private:
     void UseInsideCamera();
     void UseHoodCamera();
 
+    void GetSteeringWheel();
+
     UCameraComponent* FindCameraByName(FName CameraName);
 
     void GetAllLiveryMeshes();

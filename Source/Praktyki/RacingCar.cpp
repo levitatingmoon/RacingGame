@@ -49,6 +49,8 @@ void ARacingCar::BeginPlay()
     CurrentMaterial = TargetMaterial;
     ChangeMeshMaterial(GameInstance->MaterialIndex);
 
+    GetSteeringWheel();
+
     TArray<UActorComponent*> AudioComponents;
     GetComponents(UAudioComponent::StaticClass(), AudioComponents);
 
@@ -196,12 +198,17 @@ void ARacingCar::Steer(const FInputActionValue& Value)
     if (!bIsStopped)
     {
         float Val = Value.Get<float>();
-        //UE_LOG(LogTemp, Warning, TEXT("Steer input: %f"), Val);
         SteerInput = FMath::Clamp(Val, -1.f, 1.f);
 
         float MaxSteerAngle = 60.0f;
 
-        FRotator Rotation = FRotator(0.f, 0.f, SteerInput * MaxSteerAngle);
+        if (SteeringWheel)
+        {
+            float WheelAngle = SteerInput * MaxSteerAngle;
+
+            FRotator NewRotation = FRotator(0.f, 0.f, WheelAngle);
+            SteeringWheel->SetRelativeRotation(NewRotation);
+        }
 
     }
 
@@ -226,6 +233,24 @@ void ARacingCar::UseHoodCamera()
     BehindCamera->SetActive(false);
     InsideCamera->SetActive(false);
     HoodCamera->SetActive(true);
+}
+
+void ARacingCar::GetSteeringWheel()
+{
+    TArray<USceneComponent*> AllChildrenComponents;
+    CarSkeletalMesh->GetChildrenComponents(true, AllChildrenComponents);
+
+    for (USceneComponent* Child : AllChildrenComponents)
+    {
+        if (UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(Child))
+        {
+            if (StaticMesh && StaticMesh->GetName() == TEXT("Steering_Wheel"))
+            {
+                SteeringWheel = StaticMesh;
+                break;
+            }
+        }
+    }
 }
 
 UCameraComponent* ARacingCar::FindCameraByName(FName CameraName)
@@ -317,18 +342,18 @@ void ARacingCar::GetAllLiveryMeshes()
     TArray<USceneComponent*> AllChildrenComponents;
     CarSkeletalMesh->GetChildrenComponents(true, AllChildrenComponents);
 
-    for (USceneComponent* ChildComp : AllChildrenComponents)
+    for (USceneComponent* Child : AllChildrenComponents)
     {
-        if (UStaticMeshComponent* StaticMeshComp = Cast<UStaticMeshComponent>(ChildComp))
+        if (UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(Child))
         {
-            if (StaticMeshComp)
+            if (StaticMesh)
             {
-                int32 NumMaterials = StaticMeshComp->GetNumMaterials();
-                for (int32 MatIndex = 0; MatIndex < NumMaterials; ++MatIndex)
+                int NumMaterials = StaticMesh->GetNumMaterials();
+                for (int MatIndex = 0; MatIndex < NumMaterials; MatIndex++)
                 {
-                    if (StaticMeshComp->GetMaterial(MatIndex) == TargetMaterial)
+                    if (StaticMesh->GetMaterial(MatIndex) == TargetMaterial)
                     {
-                        MeshesWithLiveryMaterial.Add(StaticMeshComp);
+                        MeshesWithLiveryMaterial.Add(StaticMesh);
                         break;
                     }
                 }
