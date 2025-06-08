@@ -32,9 +32,9 @@ void ARacingCar::BeginPlay()
     UGameInstance* GI = GetWorld()->GetGameInstance();
     URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GI);
 
-    BehindCamera = FindCameraByName(TEXT("BehindCamera"));
-    InsideCamera = FindCameraByName(TEXT("InsideCamera"));
-    HoodCamera = FindCameraByName(TEXT("HoodCamera"));
+    BehindCamera = FindCameraByName(TEXT("CameraBehind"));
+    InsideCamera = FindCameraByName(TEXT("CameraInside"));
+    HoodCamera = FindCameraByName(TEXT("CameraHood"));
 
     ThrottleParticles = Cast<UNiagaraComponent>(GetDefaultSubobjectByName(TEXT("ExhaustFlame")));
     WheelLBParticles = Cast<UNiagaraComponent>(GetDefaultSubobjectByName(TEXT("WheelLeftBackEmitter")));
@@ -57,7 +57,7 @@ void ARacingCar::BeginPlay()
     for (UActorComponent* Audio : AudioComponents)
     {
         UAudioComponent* AudioComponent = Cast<UAudioComponent>(Audio);
-        if (AudioComponent && AudioComponent->GetName() == TEXT("EngineSound"))
+        if (AudioComponent && AudioComponent->GetName() == TEXT("SoundEngine"))
         {
             EngineSound = AudioComponent;
             break;

@@ -74,10 +74,13 @@ private:
     UPROPERTY()
     AGhostCar* LastGhost = nullptr;
 
+    UPROPERTY()
     UCameraComponent* BehindCamera;
 
+    UPROPERTY()
     UCameraComponent* InsideCamera;
 
+    UPROPERTY()
     UCameraComponent* HoodCamera;
 
     UPROPERTY()
@@ -127,6 +130,7 @@ public:
     bool bThisLapPenalty = false;
     float Penalty;
 
+    UPROPERTY()
     UAudioComponent* EngineSound;
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
