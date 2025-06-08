@@ -25,7 +25,6 @@ void AMyPlayerController::BeginPlay()
         RaceWidgetClass = Car->RaceWidgetClass;
         EndRaceWidgetClass = Car->EndRaceWidgetClass;
         StartRaceWidgetClass = Car->StartRaceWidgetClass;
-        //Car->StopCar();
 
     }
 
@@ -119,8 +118,7 @@ void AMyPlayerController::AddMainMenuWidget()
 
 void AMyPlayerController::AddRaceWidget()
 {
-    //APraktykiGameModeBase* GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
-    //ARacingCar* Car = Cast<ARacingCar>(GetPawn());
+
     if (RaceWidgetClass)
     {
         RaceWidget = CreateWidget<URaceWidget>(this, RaceWidgetClass);
@@ -197,11 +195,6 @@ void AMyPlayerController::RemoveEndRaceWidget()
     }
 }
 
-void AMyPlayerController::UpdateRaceWidget()
-{
-    
-}
-
 void AMyPlayerController::ChangeWidgetsAtRaceStart()
 {
     RemoveStartRaceWidget();
@@ -214,9 +207,6 @@ void AMyPlayerController::GetEndRaceStatistics()
     RemoveRaceWidget();
     AddEndRaceWidget();
     Car->EngineSound->Stop();
-
-    //ARacingCar* Car = Cast<ARacingCar>(GetPawn());
-    //APraktykiGameModeBase* GameMode = Cast<APraktykiGameModeBase>(GetWorld()->GetAuthGameMode());
     
     if (EndRaceWidgetClass)
     {
@@ -248,7 +238,7 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
             StartLapTime = TimerTime;
             SectorStartTime = TimerTime;
             bStartedFirstLap = true;
-            bFirstLap = true;
+            //bFirstLap = true;
             if (GameMode->bIsGhostCar)
             {
                 Car->StartGhostRecording();
@@ -264,7 +254,7 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
             {
                 Car->OnLapCompleted();
             }
-            bFirstLap = false;
+            //bFirstLap = false;
             //End of lap, so the last sector ends here
             CurrentSectorTimes[NumberOfSectors - 1] = TimerTime - SectorStartTime;
             
@@ -475,7 +465,6 @@ void AMyPlayerController::StartRaceCountdown()
 
 void AMyPlayerController::LightOn(int LightIndex)
 {
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("LIGHT ON"));
     if (StartRaceWidget->LightOnSound)
     {
         UGameplayStatics::PlaySoundAtLocation(this, StartRaceWidget->LightOnSound, Car->GetActorLocation());
@@ -501,12 +490,10 @@ void AMyPlayerController::LightsOut()
 
 void AMyPlayerController::ShowPenalty(float Penalty)
 {
-    FString Msg = FString::Printf(TEXT("PENALTY"));
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+    
     if (RaceWidget)
     {
-        Msg = FString::Printf(TEXT("WIDGET"));
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, Msg);
+       
         if (GameMode->bIsRace)
         {
             RaceWidget->PenaltyText->SetText(FText::FromString(TEXT("PENALTY: +5 SECONDS - Exceeded track limits")));

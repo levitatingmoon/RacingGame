@@ -25,6 +25,41 @@ class PRAKTYKI_API AMyPlayerController : public APlayerController
 protected:
     virtual void BeginPlay() override;
 
+private:
+
+    FTimerHandle TimerHandle;
+
+    FTimerHandle VisibilityTimer;
+
+    bool bEndRaceWidget = false;
+
+    void AddMainMenuWidget();
+
+    void AddRaceWidget();
+
+    void AddStartRaceWidget();
+
+    void AddEndRaceWidget();
+
+    void RemoveMainMenuWidget();
+
+    void RemoveRaceWidget();
+
+    void RemoveStartRaceWidget();
+
+    void RemoveEndRaceWidget();
+
+    void ChangeWidgetsAtRaceStart();
+
+    void GetEndRaceStatistics();
+
+    FString FormatTime(float TimeSeconds, bool bMilliseconds);
+
+    void HidePenalty();
+
+    UFUNCTION()
+    void ShowPenalty(float Penalty);
+
 public:
     virtual void Tick(float DeltaTime) override;
 
@@ -58,48 +93,13 @@ public:
     UPROPERTY()
     ARacingCar* Car;
 
-    FTimerHandle TimerHandle;
-
-    FTimerHandle VisibilityTimer;
-
-    bool bEndRaceWidget = false;
-
-    void AddMainMenuWidget();
-
-    void AddRaceWidget();
-
-    void AddStartRaceWidget();
-
-    void AddEndRaceWidget();
-
-    void RemoveMainMenuWidget();
-
-    void RemoveRaceWidget();
-
-    void RemoveStartRaceWidget();
-
-    void RemoveEndRaceWidget();
-
-    void UpdateRaceWidget();
-
-    void ChangeWidgetsAtRaceStart();
-
-    void GetEndRaceStatistics();
-
     void SectorUpdate(int Index, float TimerTime);
-
-    FString FormatTime(float TimeSeconds, bool bMilliseconds);
 
     void StartRaceCountdown();
 
     void LightOn(int LightIndex);
 
     void LightsOut();
-
-    UFUNCTION()
-    void ShowPenalty(float Penalty);
-
-    void HidePenalty();
 
     void ResetForRace();
 
@@ -116,12 +116,12 @@ private:
     float BestQualiLap = 0.0f;
     float StartLapTime;
     float SectorStartTime;
-    float RaceTime;
+    //float RaceTime;
     int PreviousSectorNumber = 0;
     int StartedLaps = 1;
     bool bRaceEnded = false;
     bool bStartedFirstLap = false;
-    bool bFirstLap = false;
+    //bool bFirstLap = false;
 
 	
 };
