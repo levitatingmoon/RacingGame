@@ -46,6 +46,7 @@ private:
     };
 
     UStaticMeshComponent* SteeringWheel;
+    float SteeringWheelAngle = 0.0f;
 
     TArray<FGhostFrame> CurrentLapFrames;
 
@@ -95,6 +96,8 @@ private:
 
     void Throttle(const FInputActionValue& Value);
     void Steer(const FInputActionValue& Value);
+
+    void UpdateSteeringWheel(float DeltaTime);
 
     void UseBehindCamera();
     void UseInsideCamera();

@@ -93,6 +93,7 @@ void ARacingCar::Tick(float DeltaTime)
             }
         }
 
+        UpdateSteeringWheel(DeltaTime);
         SuspensionWheelForce();
         
         FVector Velocity = CarSkeletalMesh->GetComponentVelocity();
@@ -200,18 +201,36 @@ void ARacingCar::Steer(const FInputActionValue& Value)
         float Val = Value.Get<float>();
         SteerInput = FMath::Clamp(Val, -1.f, 1.f);
 
-        float MaxSteerAngle = 60.0f;
+        float MaxSteerAngle = 45.0f;
 
         if (SteeringWheel)
         {
             float WheelAngle = SteerInput * MaxSteerAngle;
 
-            FRotator NewRotation = FRotator(0.f, 0.f, WheelAngle);
+            float InterpSpeed = 1.0f;
+            SteeringWheelAngle = FMath::FInterpTo(SteeringWheelAngle, WheelAngle, GetWorld()->GetDeltaSeconds(), InterpSpeed);
+            FRotator NewRotation = FRotator(0.f, 0.f, SteeringWheelAngle);
+
             SteeringWheel->SetRelativeRotation(NewRotation);
         }
 
     }
 
+}
+
+void ARacingCar::UpdateSteeringWheel(float DeltaTime)
+{
+    if (SteeringWheel)
+    {
+        float MaxSteerAngle = 45.0f;
+        float TargetAngle = SteerInput * MaxSteerAngle;
+
+        float InterpSpeed = 5.0f;
+        SteeringWheelAngle = FMath::FInterpTo(SteeringWheelAngle, TargetAngle, DeltaTime, InterpSpeed);
+
+        FRotator NewRotation(0.f, 0.f, SteeringWheelAngle);
+        SteeringWheel->SetRelativeRotation(NewRotation);
+    }
 }
 
 void ARacingCar::UseBehindCamera()
