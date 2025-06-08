@@ -97,7 +97,6 @@ private:
     void UpdateFOV();
 
     void SuspensionWheelForce();
-    void SteerForce();
 
     void Throttle(const FInputActionValue& Value);
     void ThrottleCompleted(const FInputActionValue& Value);
@@ -164,20 +163,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Physics")
     float ForwardFrictionStrength = 300.f;
 
-    UPROPERTY(EditAnywhere, Category = "Physics")
-    float SteeringGripStrength = 25000.f;
 
-    UPROPERTY(EditAnywhere, Category = "Physics")
-    float MaxSteeringAngle = 0.4f;
-
-    UPROPERTY(VisibleAnywhere, Category = "Visuals")
-    float SteeringAngle;
-
-    UPROPERTY(VisibleAnywhere, Category = "Visuals")
-    float WheelSpinAngle;
-
-    UPROPERTY(EditAnywhere, Category = "Visuals")
-    float WheelSpinSpeed = 500.f;
 
     UPROPERTY()
     URaceWidget* RaceWidget;

@@ -573,63 +573,6 @@ void ARacingCar::SuspensionWheelForce()
     bWasOffTrack = bIsOffTrack;
 }
 
-//TESTING
-void ARacingCar::SteerForce()
-{
-    for (const FName& Bone : WheelBones)
-    {
-        //UE_LOG(LogTemp, Warning, TEXT("SteerInput: %f"), SteerInput);
-
-        FRotator BoneRotation = CarSkeletalMesh->GetBoneQuaternion(Bone).Rotator();
-        FVector SteeringDir = BoneRotation.RotateVector(FVector::RightVector);
-
-        //UE_LOG(LogTemp, Warning, TEXT("Wheel %s SteeringDir: %s"), *Bone.ToString(), *SteeringDir.ToString());
-
-        FVector WheelVelocity = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(CarSkeletalMesh->GetBoneLocation(Bone));
-
-
-        if (Bone == WheelBones[0] || Bone == WheelBones[1])
-        {
-
-            FVector ForwardDir = BoneRotation.RotateVector(FVector::ForwardVector);
-            float ForwardSpeed = FVector::DotProduct(WheelVelocity, ForwardDir);
-
-            float SteeringStrength = FMath::Clamp(ForwardSpeed * 2.0f, 10.f, 50.f);
-
-            //FVector LateralSteeringForce = SteeringDir * SteerInput * SteeringStrength;
-
-            FVector LateralSteeringForce = SteeringDir * SteerInput * ForwardSpeed * SteeringStrength; //SteeringStrength;
-
-            UE_LOG(LogTemp, Warning, TEXT("FORWARD: %f"), ForwardSpeed);
-            if (FMath::Abs(SteerInput) > 0.01f)
-            {
-                CarSkeletalMesh->AddForceAtLocation(LateralSteeringForce, CarSkeletalMesh->GetBoneLocation(Bone));
-            }
-            //UE_LOG(LogTemp, Warning, TEXT("FORCE: %f %f %f"), LateralSteeringForce.X, LateralSteeringForce.Y, LateralSteeringForce.Z);
-
-            //DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + LateralSteeringForce * 0.01f, FColor::Green, false, 0.1f, 0, 2.0f);
-        
-        }
-        
-        float SteeringVelocity = FVector::DotProduct(SteeringDir, WheelVelocity);
-
-        float DesiredVelChange = -SteeringVelocity * GripFactor; //0-1 friction
-
-        float DesiredAccel = DesiredVelChange / GetWorld()->GetDeltaSeconds();
-
-        FVector GripForce = SteeringDir * DesiredAccel * TireMass;
-
-        //UE_LOG(LogTemp, Warning, TEXT("GRIP: %f %f %f"), GripForce.X, GripForce.Y, GripForce.Z);
-        if (FMath::Abs(SteerInput) > 0.01f)
-        {
-            CarSkeletalMesh->AddForceAtLocation(GripForce, CarSkeletalMesh->GetBoneLocation(Bone));
-        }
-        //DrawDebugLine(GetWorld(), CarSkeletalMesh->GetBoneLocation(Bone), CarSkeletalMesh->GetBoneLocation(Bone) + GripForce * 0.01f, FColor::Red, false, 0.1f, 0, 2.0f);
-
-        
-    }
-}
-
 void ARacingCar::StartGhostRecording()
 {
     bRecordingGhost = true;
