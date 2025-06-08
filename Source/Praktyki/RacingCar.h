@@ -45,7 +45,7 @@ private:
         FName("wheel_back_left_spin")
     };
 
-    FName SteeringWheelBone = "";
+    UStaticMeshComponent* SteeringWheel;
 
     TArray<FGhostFrame> CurrentLapFrames;
 
@@ -163,8 +163,6 @@ public:
 
     UPROPERTY(EditAnywhere, Category = "Visuals")
     float WheelSpinSpeed = 500.f;
-
-
 
     UPROPERTY()
     URaceWidget* RaceWidget;

@@ -27,6 +27,11 @@ void ARacingCar::BeginPlay()
 {
     Super::BeginPlay();
 
+    CarSkeletalMesh = Cast<USkeletalMeshComponent>(GetRootComponent());
+
+    UGameInstance* GI = GetWorld()->GetGameInstance();
+    URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GI);
+
     BehindCamera = FindCameraByName(TEXT("BehindCamera"));
     InsideCamera = FindCameraByName(TEXT("InsideCamera"));
     HoodCamera = FindCameraByName(TEXT("HoodCamera"));
@@ -37,21 +42,14 @@ void ARacingCar::BeginPlay()
 
     UseBehindCamera();
 
-    CarSkeletalMesh = Cast<USkeletalMeshComponent>(GetRootComponent());
-
     FVector CenterOfMassOffset = FVector(0.f, 0.f, -200.f);
     CarSkeletalMesh->SetCenterOfMass(CenterOfMassOffset);
 
     GetAllLiveryMeshes();
     CurrentMaterial = TargetMaterial;
-
-    UGameInstance* GI = GetWorld()->GetGameInstance();
-    URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GI);
-
     ChangeMeshMaterial(GameInstance->MaterialIndex);
 
     TArray<UActorComponent*> AudioComponents;
-
     GetComponents(UAudioComponent::StaticClass(), AudioComponents);
 
     for (UActorComponent* Audio : AudioComponents)
