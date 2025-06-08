@@ -99,6 +99,9 @@ void UMainMenuWidget::OnResetClicked()
     OnLapLimitSliderChanged(LapLimitSliderDefault);
 
     OwningRacingCar->ChangeMeshMaterial(3);
+
+    GhostCarCheckbox->SetIsChecked(false);
+    OnGhostCarCheckboxToggled(false);
 }
 
 void UMainMenuWidget::OnStartClicked()

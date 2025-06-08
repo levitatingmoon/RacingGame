@@ -19,11 +19,8 @@ void APraktykiGameModeBase::BeginPlay()
     Super::BeginPlay();
     QualiTime = 0.f;
     QualiCountdownTime = 300.0f;
-    bQualiOver = false;
     bIsQuali = false;
     TArray<AActor*> AllTimingLines;
-
-    //GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::QualiStart, 3.0f, false);
 
     FString MapName = GetWorld()->GetMapName();
     MapName = FPackageName::GetShortName(MapName);
@@ -38,7 +35,7 @@ void APraktykiGameModeBase::BeginPlay()
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATimingLine::StaticClass(), AllTimingLines);
         SectorNumber = AllTimingLines.Num();
         bIsMenu = false;
-        //GetWorld()->GetTimerManager().SetTimer(TimerHandleTimeToStart, this, &APraktykiGameModeBase::QualiStart, 3.0f, false);
+
         QualiCountdownTime = MaxQualiTime;
         QualiStart();
     }
@@ -47,7 +44,7 @@ void APraktykiGameModeBase::BeginPlay()
 
 void APraktykiGameModeBase::QualiStart()
 {
-    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("QUALI START"));
+
     bIsQuali = true;
     ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
     if (Car)
@@ -88,10 +85,6 @@ void APraktykiGameModeBase::RaceStart()
     }
 }
 
-void APraktykiGameModeBase::RaceEnd()
-{
-}
-
 void APraktykiGameModeBase::LightsOut()
 {
     ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
@@ -111,7 +104,7 @@ void APraktykiGameModeBase::LightSequence()
     ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
     if (Car)
     {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("LIGHT SEQUENCE"));
+
         AMyPlayerController* PC = Cast<AMyPlayerController>(Car->GetController());
         if (PC)
         {
@@ -159,8 +152,6 @@ void APraktykiGameModeBase::Tick(float DeltaSeconds)
         {
 
             QualiCountdownTime = 0.f;
-            bQualiOver = true;
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("QUALI END"));
 
             ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
             if (Car)

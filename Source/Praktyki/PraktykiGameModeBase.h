@@ -24,39 +24,31 @@ class PRAKTYKI_API APraktykiGameModeBase : public AGameModeBase
 protected:
     virtual void BeginPlay() override;
 
-public:
-    float QualiTime = 0.f;
-    float MaxQualiTime = 200.f;
-    float QualiCountdownTime = 300.0f;
-    bool bQualiOver = false;
+private:
 
-    int LapLimit = 1;
-    int CurrentLap = 1;
-    bool bRaceOver = false;
-    float RaceTime = 0.0f;
-
-    bool bIsQuali = false;
-    bool bIsRace = false;
-    bool bIsGhostCar = false;
-
-    int NrOfSectors = 0;
- 
+    float MaxQualiTime = 300.f;
     int CurrentLight = 0;
     int LightsNumber = 5;
 
     void QualiStart();
     void QualiEnd();
-
     void RaceStart();
-    void RaceEnd();
-
     void LightsOut();
-
     void LightSequence();
-
     void GetInstanceValues();
 
     FTimerHandle TimerHandleTimeToStart;
+
+public:
+
+    float QualiTime = 0.f;
+    int LapLimit = 1;
+
+    float QualiCountdownTime = 300.0f;
+
+    bool bIsQuali = false;
+    bool bIsRace = false;
+    bool bIsGhostCar = false;
 
     int SectorNumber = 0;
 
