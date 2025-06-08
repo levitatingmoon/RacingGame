@@ -113,25 +113,18 @@ void ARacingCar::Tick(float DeltaTime)
             CarSkeletalMesh->AddForce(ForwardResistance);
         }
         
-        //adding force when input
+        //Adding force when input
         if (!ThrottleInput.IsNearlyZero())
         {
             float Speed = CarSkeletalMesh->GetComponentVelocity().Size();
             float SpeedRatio = FMath::Clamp(Speed / MaxSpeed, 0.f, 1.f);
             float ForceScale = 1.f - SpeedRatio;
 
-            //float SurfaceThrottleFactor = FMath::Clamp(1.f / SurfaceFriction, 0.1f, 1.f);
-            //float SurfaceThrottleFactor = FMath::Clamp(FMath::Pow(1.f / SurfaceFriction, 1.5f), 0.05f, 1.f);
-
-
-            //FVector Force = CarSkeletalMesh->GetForwardVector() * ThrottleInput.X * MoveForce * ForceScale * SurfaceThrottleFactor;
-            //CarSkeletalMesh->AddForce(Force);
-
             float InputX = ThrottleInput.X;
             FString DebugForce = FString::Printf(TEXT("InputX: %.3f"), InputX);
             GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, DebugForce);
 
-            //Acceleration
+            //Acceleration || Reverse
             if (InputX > 0.0f || (InputX < 0.0f && ForwardSpeed <= 0.0f))
             {
                 float SurfaceThrottleFactor = FMath::Clamp(FMath::Pow(1.f / SurfaceFriction, 1.5f), 0.05f, 1.f);
@@ -150,12 +143,6 @@ void ARacingCar::Tick(float DeltaTime)
                 GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, DebugBrake);
                 CarSkeletalMesh->AddForce(BrakingForce);
             }
-            //Reverse
-            else if (InputX < 0.0f && Speed < 10.0f)
-            {
-
-            }
-
 
         }
 
