@@ -1,6 +1,5 @@
 #include "RacingCar.h"
 #include "PraktykiGameModeBase.h"
-#include "RacingCarMovementComponent.h"
 #include "RaceWidget.h"
 #include "EndRaceWidget.h"
 #include "StartRaceWidget.h"
@@ -455,15 +454,15 @@ void ARacingCar::SuspensionWheelForce()
                 }
             }
 
-            FVector springDir = FVector::UpVector;
-            FVector tireWorldVel = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(Start);
+            FVector SpringDirection = FVector::UpVector;
+            FVector TireWorldVelocity = CarSkeletalMesh->GetPhysicsLinearVelocityAtPoint(Start);
 
-            float offset = 50.0f - Hit.Distance;
+            float Offset = 50.0f - Hit.Distance;
 
-            float vel = FVector::DotProduct(springDir, tireWorldVel);
-            float force = (offset * SpringStrength) - (vel * SpringDamping);
+            float Vel = FVector::DotProduct(SpringDirection, TireWorldVelocity);
+            float Force = (Offset * SpringStrength) - (Vel * SpringDamping);
 
-            CarSkeletalMesh->AddForceAtLocation(springDir * force, Start);
+            CarSkeletalMesh->AddForceAtLocation(SpringDirection * Force, Start);
 
             //SteerForce(Bone);
 

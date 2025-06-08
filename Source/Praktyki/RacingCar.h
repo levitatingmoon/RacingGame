@@ -54,25 +54,30 @@ private:
     bool bRecordingGhost = false;
 
     float PreviousThrottleValue = 0.0f;
-
-    UPROPERTY()
-    AGhostCar* LastGhost = nullptr;
+    FVector2D ThrottleInput;
+    float SteerInput;
 
     bool bPreviousGravelLB = false;
     bool bPreviousGravelRB = false;
 
-public:
-    virtual void Tick(float DeltaTime) override;
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-    
-    void SuspensionWheelForce();
-    void SteerForce();
+    float GripFactor = 1.0f;
+    float TireMass = 1.0f;
 
-    void StartGhostRecording();
-    void StopGhostRecording();
-    TArray<FGhostFrame>& GetRecordedGhostFrames();
+    float SpringStrength = 8000.0f;
+    float SpringDamping = 2000.0f;
 
-    UAudioComponent* EngineSound;
+    bool bWasOffTrack = false;
+
+    bool bIsStopped = false;
+
+    UPROPERTY()
+    AGhostCar* LastGhost = nullptr;
+
+    UCameraComponent* BehindCamera;
+
+    UCameraComponent* InsideCamera;
+
+    UCameraComponent* HoodCamera;
 
     UPROPERTY()
     UNiagaraComponent* ThrottleParticles;
@@ -83,10 +88,41 @@ public:
     UPROPERTY()
     UNiagaraComponent* WheelRBParticles;
 
-    UPROPERTY(EditAnywhere, Category = "Physics")
-    float GripFactor = 1.0f;
-    UPROPERTY(EditAnywhere, Category = "Physics")
-    float TireMass = 1.0f;
+    void UpdateFOV();
+
+    void SuspensionWheelForce();
+    void SteerForce();
+
+    void Throttle(const FInputActionValue& Value);
+    void Steer(const FInputActionValue& Value);
+
+    void UseBehindCamera();
+    void UseInsideCamera();
+    void UseHoodCamera();
+
+    UCameraComponent* FindCameraByName(FName CameraName);
+
+    void GetAllLiveryMeshes();
+
+public:
+    virtual void Tick(float DeltaTime) override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    
+    void StopCar();
+    void StartCar();
+    void PrepareForRace();
+    void OnLapCompleted();
+
+    void StartGhostRecording();
+    void StopGhostRecording();
+    TArray<FGhostFrame>& GetRecordedGhostFrames();
+
+    void ChangeMeshMaterial(int Index);
+
+    bool bThisLapPenalty = false;
+    float Penalty;
+
+    UAudioComponent* EngineSound;
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnPenaltyUpdated OnPenaltyUpdated;
@@ -94,33 +130,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ghost")
     TSubclassOf<AGhostCar> GhostCarClass;
 
-
-    void Throttle(const FInputActionValue& Value);
-    void Steer(const FInputActionValue& Value);
-    void StopCar();
-    void StartCar();
-    void PrepareForRace();
-
-    void OnLapCompleted();
-
-    void UseBehindCamera();
-    void UseInsideCamera();
-    void UseHoodCamera();
-    UCameraComponent* FindCameraByName(FName CameraName);
-
-
-
-    bool bWasOffTrack = false;
-    bool bThisLapPenalty = false;
-    bool bPreviousLapPenalty = false;
-
-    float Penalty;
-
-    FVector2D ThrottleInput;
-    float SteerInput;
-
     UPROPERTY()
     USkeletalMeshComponent* CarSkeletalMesh;
+
 
     UPROPERTY(EditAnywhere, Category = "Physics")
     float MoveForce = 100000.f;
@@ -152,16 +164,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Visuals")
     float WheelSpinSpeed = 500.f;
 
-    UCameraComponent* BehindCamera;
 
-    UCameraComponent* InsideCamera;
-
-    UCameraComponent* HoodCamera;
-
-    //UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    //URacingCarMovementComponent* MovementComponent;
-
-    bool bIsStopped = false;
 
     UPROPERTY()
     URaceWidget* RaceWidget;
@@ -188,18 +191,13 @@ public:
     UPROPERTY()
     APraktykiGameModeBase* GameMode;
 
-    float SpringStrength = 8000.0f;
-    float SpringDamping = 2000.0f;
-
     UPROPERTY()
     TArray<UStaticMeshComponent*> MeshesWithLiveryMaterial;
-
-    void GetAllLiveryMeshes();
-    void ChangeMeshMaterial(int Index);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
     UMaterialInterface* TargetMaterial;
 
+    UPROPERTY()
     UMaterialInterface* CurrentMaterial;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
@@ -208,25 +206,22 @@ public:
     UPROPERTY(EditAnywhere, Category = "Location")
     AStartingSpot* StartingSpot;
 
-    void UpdateFOV();
-
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
     class UInputMappingContext* IMC_CarControls;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
     class UInputAction* IA_Throttle;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
     class UInputAction* IA_Steer;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
     class UInputAction* IA_BehindCamera;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
     class UInputAction* IA_InsideCamera;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
     class UInputAction* IA_HoodCamera;
 
 };

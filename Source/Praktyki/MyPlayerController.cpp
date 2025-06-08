@@ -350,7 +350,7 @@ void AMyPlayerController::SectorUpdate(int Index, float TimerTime)
                 BestSectorTimes = PreviousBestSectorTimes;
             }
 
-            Car->bPreviousLapPenalty = Car->bThisLapPenalty;
+            //Car->bPreviousLapPenalty = Car->bThisLapPenalty;
             Car->bThisLapPenalty = false;
             PreviousSectorNumber = Index;
         }

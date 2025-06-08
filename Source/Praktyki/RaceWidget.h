@@ -18,6 +18,12 @@ UCLASS()
 class PRAKTYKI_API URaceWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+private:
+
+	FTimerHandle SectorColourTimer;
+
+	FTimerHandle SectorDifferenceTimer;
 	
 public:
 
@@ -79,9 +85,5 @@ public:
 
 	UPROPERTY()
 	TArray<UImage*> SectorImages;
-
-	FTimerHandle SectorColourTimer;
-
-	FTimerHandle SectorDifferenceTimer;
 
 };
