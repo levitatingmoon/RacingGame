@@ -139,6 +139,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
     class UInputAction* IA_HoodCamera;
 
+    UPROPERTY()
+    AGhostCar* LastGhost = nullptr;
+
 protected:
     virtual void BeginPlay() override;
 
@@ -181,9 +184,6 @@ private:
     float SurfaceFriction = 1.0f;
 
     bool bParticlesActive = false;
-
-    UPROPERTY()
-    AGhostCar* LastGhost = nullptr;
 
     UPROPERTY()
     UCameraComponent* BehindCamera;

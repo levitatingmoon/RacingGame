@@ -13,6 +13,7 @@
 #include "Components/Image.h"
 #include "Components/AudioComponent.h"
 #include <Components/CanvasPanelSlot.h>
+#include "GhostCar.h"
 
 void AMyPlayerController::BeginPlay()
 {
@@ -221,6 +222,11 @@ void AMyPlayerController::GetEndRaceStatistics()
     RemoveRaceWidget();
     AddEndRaceWidget();
     Car->EngineSound->Stop();
+
+    if (Car->LastGhost)
+    {
+        Car->LastGhost->Destroy();
+    }
     
     if (EndRaceWidgetClass)
     {
