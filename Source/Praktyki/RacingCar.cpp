@@ -207,8 +207,10 @@ void ARacingCar::Throttle(const FInputActionValue& Value)
                 EngineSound->Stop();
             }
         }
+        FString DebugText = FString::Printf(TEXT("Previous: %.2f | Current: %.2f"), PreviousThrottleValue, Val);
+        GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan, DebugText);
 
-        if (PreviousThrottleValue <= 0.0f && Val > 0.1f && ThrottleParticles)
+        if (PreviousThrottleValue <= 0.0f && Val > 0.0f && ThrottleParticles)
         {
             ThrottleParticles->Activate(true);
         }
@@ -220,6 +222,10 @@ void ARacingCar::Throttle(const FInputActionValue& Value)
 void ARacingCar::ThrottleCompleted(const FInputActionValue& Value)
 {
     ThrottleInput.X = 0.f;
+    if (EngineSound->IsPlaying())
+    {
+        EngineSound->Stop();
+    }
 }
 
 void ARacingCar::Steer(const FInputActionValue& Value)
