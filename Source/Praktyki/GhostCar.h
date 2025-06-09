@@ -19,6 +19,17 @@ class PRAKTYKI_API AGhostCar : public APawn
 public:
     AGhostCar();
 
+    virtual void Tick(float DeltaTime) override;
+
+    void LoadGhostData(TArray<FGhostFrame>& SavedFrames);
+    void StartGhostPlayback();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+    UMaterialInterface* GhostMaterial;
+
+    UPROPERTY()
+    USkeletalMeshComponent* CarSkeletalMesh;
+
 protected:
     virtual void BeginPlay() override;
 
@@ -32,16 +43,5 @@ private:
 
     void UpdateGhostPlayback(float DeltaTime);
     void ChangeMaterial();
-	
-public:
-    virtual void Tick(float DeltaTime) override;
 
-    void LoadGhostData(TArray<FGhostFrame>& SavedFrames);
-    void StartGhostPlayback();
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-    UMaterialInterface* GhostMaterial;
-
-    UPROPERTY()
-    USkeletalMeshComponent* CarSkeletalMesh;
 };

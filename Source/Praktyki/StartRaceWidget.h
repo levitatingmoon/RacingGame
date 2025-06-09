@@ -15,6 +15,17 @@ class PRAKTYKI_API UStartRaceWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* LightOnSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* LightsOffSound;
+
+	void SetLightColour(int32 Index, FLinearColor Colour);
+
 private:
 
 	UPROPERTY(meta = (BindWidget))
@@ -34,14 +45,6 @@ private:
 
 	UImage* GetLightByIndex(int32 Index);
 
-public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
-	USoundBase* LightOnSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
-	USoundBase* LightsOffSound;
-
-	void SetLightColour(int32 Index, FLinearColor Colour);
 
 };

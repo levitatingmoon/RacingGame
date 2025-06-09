@@ -326,13 +326,10 @@ void ARacingCar::StopCar()
     bIsStopped = true;
     CarSkeletalMesh->SetAllPhysicsLinearVelocity(FVector::ZeroVector);
     CarSkeletalMesh->SetAllPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
-
-    UE_LOG(LogTemp, Warning, TEXT("STOPPED"));
 }
 
 void ARacingCar::StartCar()
 {
-    UE_LOG(LogTemp, Warning, TEXT("START"));
     bIsStopped = false;
 }
 
@@ -374,6 +371,7 @@ void ARacingCar::OnLapCompleted()
         SpawnRot = GetActorRotation();
     }
     
+    UE_LOG(LogTemp, Warning, TEXT("Ghost Spawn: First frame at %s, Num frames: %d"), *SpawnLoc.ToString(), FinishedLapFrames.Num());
     AGhostCar* NewGhost = GetWorld()->SpawnActor<AGhostCar>(GhostCarClass, SpawnLoc, SpawnRot, SpawnParams);
 
     if (NewGhost)
@@ -540,9 +538,6 @@ void ARacingCar::SuspensionWheelForce()
 
             CarSkeletalMesh->AddForceAtLocation(SpringDirection * Force, Start);
 
-            //SteerForce(Bone);
-
-            //DrawDebugLine(GetWorld(), Start, Start + (springDir * force)/10000.0f, FColor::Blue, false, 2.0f, 0, 2.0f);
             if (PhysMat)
             {
                 SurfaceFriction += PhysMat->Friction;

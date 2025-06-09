@@ -21,6 +21,21 @@ class PRAKTYKI_API APraktykiGameModeBase : public AGameModeBase
 
     virtual void Tick(float DeltaSeconds) override;
 
+public:
+
+    float QualiTime = 0.f;
+    int LapLimit = 1;
+
+    float QualiCountdownTime = 300.0f;
+
+    bool bIsQuali = false;
+    bool bIsRace = false;
+    bool bIsGhostCar = false;
+
+    int SectorNumber = 0;
+
+    bool bIsMenu = false;
+
 protected:
     virtual void BeginPlay() override;
 
@@ -38,20 +53,5 @@ private:
     void GetInstanceValues();
 
     FTimerHandle TimerHandleTimeToStart;
-
-public:
-
-    float QualiTime = 0.f;
-    int LapLimit = 1;
-
-    float QualiCountdownTime = 300.0f;
-
-    bool bIsQuali = false;
-    bool bIsRace = false;
-    bool bIsGhostCar = false;
-
-    int SectorNumber = 0;
-
-    bool bIsMenu = false;
 	 
 };

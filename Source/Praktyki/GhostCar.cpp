@@ -65,7 +65,6 @@ void AGhostCar::UpdateGhostPlayback(float DeltaTime)
 
     PlaybackTime += DeltaTime;
 
-    // Calculate current frame index based on playback time
     int32 NewFrameIndex = FMath::FloorToInt(PlaybackTime / FrameInterval);
     NewFrameIndex = FMath::Clamp(NewFrameIndex, 0, GhostFrames.Num() - 2);
 

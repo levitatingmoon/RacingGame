@@ -21,45 +21,6 @@ class PRAKTYKI_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-
-protected:
-    virtual void BeginPlay() override;
-
-private:
-
-    FTimerHandle TimerHandle;
-
-    FTimerHandle VisibilityTimer;
-
-    bool bEndRaceWidget = false;
-
-    void AddMainMenuWidget();
-
-    void AddRaceWidget();
-
-    void AddStartRaceWidget();
-
-    void AddEndRaceWidget();
-
-    void RemoveMainMenuWidget();
-
-    void RemoveRaceWidget();
-
-    void RemoveStartRaceWidget();
-
-    void RemoveEndRaceWidget();
-
-    void ChangeWidgetsAtRaceStart();
-
-    void GetEndRaceStatistics();
-
-    FString FormatTime(float TimeSeconds, bool bMilliseconds);
-
-    void HidePenalty();
-
-    UFUNCTION()
-    void ShowPenalty(float Penalty);
-
 public:
     virtual void Tick(float DeltaTime) override;
 
@@ -103,7 +64,43 @@ public:
 
     void ResetForRace();
 
+protected:
+    virtual void BeginPlay() override;
+
 private:
+
+    FTimerHandle TimerHandle;
+
+    FTimerHandle VisibilityTimer;
+
+    bool bEndRaceWidget = false;
+
+    void AddMainMenuWidget();
+
+    void AddRaceWidget();
+
+    void AddStartRaceWidget();
+
+    void AddEndRaceWidget();
+
+    void RemoveMainMenuWidget();
+
+    void RemoveRaceWidget();
+
+    void RemoveStartRaceWidget();
+
+    void RemoveEndRaceWidget();
+
+    void ChangeWidgetsAtRaceStart();
+
+    void GetEndRaceStatistics();
+
+    FString FormatTime(float TimeSeconds, bool bMilliseconds);
+
+    void HidePenalty();
+
+    UFUNCTION()
+    void ShowPenalty(float Penalty);
 
     TArray<float> CurrentSectorTimes;
     TArray<float> PreviousBestSectorTimes;
@@ -116,12 +113,10 @@ private:
     float BestQualiLap = 0.0f;
     float StartLapTime;
     float SectorStartTime;
-    //float RaceTime;
     int PreviousSectorNumber = 0;
     int StartedLaps = 1;
     bool bRaceEnded = false;
     bool bStartedFirstLap = false;
-    //bool bFirstLap = false;
 
 	
 };
