@@ -10,7 +10,7 @@
 - [x] Car colour change
 - [x] Ghost car of previous lap
 - [x] Sector times
-- [x] UI with race data (current laptime, best laptime, sector times, sector time delta)
+- [x] UI with race data (current laptime, previous laptime, best laptime, sector times, sector time delta, penalties)
 - [x] Race start UI
 - [x] Surface friction (different friction depending on surface)
 - [x] Sounds

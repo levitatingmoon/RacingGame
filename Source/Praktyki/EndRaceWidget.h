@@ -35,6 +35,9 @@ public:
 	UTextBlock* Penalties;
 
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* RaceFinalTime;
+
+	UPROPERTY(meta = (BindWidget))
 	UButton* MenuButton;
 
 	UPROPERTY(meta = (BindWidget))

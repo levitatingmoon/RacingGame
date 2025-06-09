@@ -236,7 +236,8 @@ void AMyPlayerController::GetEndRaceStatistics()
             }
             EndRaceWidget->FastestLap->SetText(FText::FromString(FormatTime(BestRaceLap, true)));
             EndRaceWidget->Penalties->SetText(FText::FromString(FString::Printf(TEXT("+%.1f"), Car->Penalty)));
-            EndRaceWidget->RaceTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime + Car->Penalty, true)));
+            EndRaceWidget->RaceTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime, true)));
+            EndRaceWidget->RaceFinalTime->SetText(FText::FromString(FormatTime(GameMode->QualiTime + Car->Penalty, true)));
         }
     }
 }

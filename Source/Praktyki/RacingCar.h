@@ -157,7 +157,7 @@ private:
 
     TArray<FGhostFrame> CurrentLapFrames;
 
-    float RecordingInterval = 0.33f; //30 FPS
+    float RecordingInterval = 1.0f / 30.0f; //30 FPS
     float RecordingTimer = 0.0f;
     bool bRecordingGhost = false;
 

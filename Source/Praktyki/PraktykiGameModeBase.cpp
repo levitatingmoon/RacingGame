@@ -28,11 +28,6 @@ void APraktykiGameModeBase::BeginPlay()
     if (MapName.Contains(TEXT("Menu")))
     {
         bIsMenu = true;
-        //ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
-        //if (Car)
-        //{
-        //    Car->ChangeMeshMaterial(3);
-        //}
     }
     else
     {

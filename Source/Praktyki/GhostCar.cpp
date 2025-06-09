@@ -13,7 +13,7 @@ AGhostCar::AGhostCar()
     bPlaying = false;
     PlaybackTime = 0.0f;
     CurrentFrameIndex = 0;
-    FrameInterval = 0.33f; // 30 FPS
+    FrameInterval = 1.0f / 30.0f; // 30 FPS
 }
 
 void AGhostCar::BeginPlay()
@@ -35,6 +35,7 @@ void AGhostCar::Tick(float DeltaTime)
 
     if (bPlaying)
     {
+
         UpdateGhostPlayback(DeltaTime);
     }
 }
@@ -52,6 +53,15 @@ void AGhostCar::StartGhostPlayback()
         PlaybackTime = 0.0f;
         CurrentFrameIndex = 0;
         PlaybackStartTime = GetWorld()->GetTimeSeconds();
+
+        const FGhostFrame& FirstFrame = GhostFrames[0];
+        SetActorLocationAndRotation(
+            FirstFrame.Location,
+            FirstFrame.Rotation,
+            false,
+            nullptr,
+            ETeleportType::TeleportPhysics
+        );
     }
 }
 
@@ -73,9 +83,13 @@ void AGhostCar::UpdateGhostPlayback(float DeltaTime)
         CurrentFrameIndex = NewFrameIndex;
     }
 
-    if (CurrentFrameIndex >= GhostFrames.Num() - 1)
+    const float TotalDuration = FrameInterval * (GhostFrames.Num() - 1);
+
+    if (PlaybackTime >= TotalDuration)
     {
         bPlaying = false;
+        const FGhostFrame& LastFrame = GhostFrames.Last();
+        SetActorLocationAndRotation(LastFrame.Location, LastFrame.Rotation, false, nullptr, ETeleportType::TeleportPhysics);
         return;
     }
 

@@ -346,7 +346,6 @@ void ARacingCar::PrepareForRace()
 void ARacingCar::OnLapCompleted()
 {
     TArray<FGhostFrame> FinishedLapFrames = CurrentLapFrames;
-    UE_LOG(LogTemp, Warning, TEXT("Recorded %d frames, total time: %.2f"), CurrentLapFrames.Num(), RecordingInterval * CurrentLapFrames.Num());
 
     CurrentLapFrames.Empty();
     RecordingTimer = 0.0f;
@@ -373,7 +372,6 @@ void ARacingCar::OnLapCompleted()
         SpawnRot = GetActorRotation();
     }
     
-    UE_LOG(LogTemp, Warning, TEXT("Ghost Spawn: First frame at %s, Num frames: %d"), *SpawnLoc.ToString(), FinishedLapFrames.Num());
     AGhostCar* NewGhost = GetWorld()->SpawnActor<AGhostCar>(GhostCarClass, SpawnLoc, SpawnRot, SpawnParams);
 
     if (NewGhost)
