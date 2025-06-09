@@ -19,12 +19,24 @@ public:
 	float TimeLimitValue = 300.0f;
 
 	UPROPERTY()
+	float TimeLimitValueDefault = 300.0f;
+
+	UPROPERTY()
 	int LapLimitValue = 10;
+
+	UPROPERTY()
+	int LapLimitValueDefault = 10;
 
 	UPROPERTY()
 	int MaterialIndex = 3;
 
 	UPROPERTY()
+	int MaterialIndexDefault = 3;
+
+	UPROPERTY()
 	bool bGhostCar = false;
+
+	UPROPERTY()
+	bool bGhostCarDefault = false;
 	
 };

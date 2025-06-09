@@ -105,7 +105,7 @@ private:
     TArray<float> CurrentSectorTimes;
     TArray<float> PreviousBestSectorTimes;
     TArray<float> BestSectorTimes;
-    TArray<float> LapTimes;
+    TArray<bool> bChangedBestTimes;
 
     int NumberOfSectors = 0;
     float PreviousLapTime;

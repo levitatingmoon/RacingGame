@@ -60,6 +60,9 @@ public:
 	UTextBlock* BestLap;
 
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* PreviousLap;
+
+	UPROPERTY(meta = (BindWidget))
 	UTextBlock* SectorTimer;
 
 	UPROPERTY(meta = (BindWidget))
@@ -69,7 +72,16 @@ public:
 	UHorizontalBox* SectorBox;
 
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* PenaltyValue;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* PenaltyValueText;
+
+	UPROPERTY(meta = (BindWidget))
 	UImage* PenaltyBackground;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* BackgroundData;
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PenaltyText;

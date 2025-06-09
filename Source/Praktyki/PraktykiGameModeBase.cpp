@@ -28,6 +28,11 @@ void APraktykiGameModeBase::BeginPlay()
     if (MapName.Contains(TEXT("Menu")))
     {
         bIsMenu = true;
+        //ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
+        //if (Car)
+        //{
+        //    Car->ChangeMeshMaterial(3);
+        //}
     }
     else
     {
@@ -76,7 +81,6 @@ void APraktykiGameModeBase::QualiEnd()
 
 void APraktykiGameModeBase::RaceStart()
 {
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("RACE START"));
     bIsRace = true;
     ARacingCar* Car = Cast<ARacingCar>(GetWorld()->GetFirstPlayerController()->GetPawn());
     if (Car)

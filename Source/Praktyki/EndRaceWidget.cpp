@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 #include "RacingCar.h"
+#include "RacingGameInstance.h"
 
 void UEndRaceWidget::NativeConstruct()
 {
@@ -33,6 +34,14 @@ void UEndRaceWidget::OnRaceAgainClicked()
 void UEndRaceWidget::OnMenuClicked()
 {
     RemoveFromParent();
+
+    if (URacingGameInstance* GameInstance = Cast<URacingGameInstance>(GetWorld()->GetGameInstance()))
+    {
+        GameInstance->TimeLimitValue = GameInstance->TimeLimitValueDefault;
+        GameInstance->LapLimitValue = GameInstance->LapLimitValueDefault;
+        GameInstance->MaterialIndex = GameInstance->MaterialIndexDefault;
+        GameInstance->bGhostCar = GameInstance->bGhostCarDefault;
+    }
 
     UGameplayStatics::OpenLevel(this, "MenuMap");
 }

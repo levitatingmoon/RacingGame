@@ -180,6 +180,8 @@ private:
 
     float SurfaceFriction = 1.0f;
 
+    bool bParticlesActive = false;
+
     UPROPERTY()
     AGhostCar* LastGhost = nullptr;
 

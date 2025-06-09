@@ -63,6 +63,7 @@ void UMainMenuWidget::NativeConstruct()
     {
         GhostCarCheckbox->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::OnGhostCarCheckboxToggled);
     }
+
 }
 
 void UMainMenuWidget::OnTimeLimitSliderChanged(float Value)

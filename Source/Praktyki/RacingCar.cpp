@@ -121,16 +121,12 @@ void ARacingCar::Tick(float DeltaTime)
             float ForceScale = 1.f - SpeedRatio;
 
             float InputX = ThrottleInput.X;
-            FString DebugForce = FString::Printf(TEXT("InputX: %.3f"), InputX);
-            GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, DebugForce);
 
             //Acceleration || Reverse
             if (InputX > 0.0f || (InputX < 0.0f && ForwardSpeed <= 0.0f))
             {
                 float SurfaceThrottleFactor = FMath::Clamp(FMath::Pow(1.f / SurfaceFriction, 1.5f), 0.05f, 1.f);
                 FVector Force = ForwardVector * InputX * MoveForce * ForceScale * SurfaceThrottleFactor;
-                DebugForce = FString::Printf(TEXT("Throttle Force: %.1f"), Force.Size());
-                GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, DebugForce);
                 CarSkeletalMesh->AddForce(Force);
             }
             //Braking
@@ -139,16 +135,10 @@ void ARacingCar::Tick(float DeltaTime)
                 float BrakingFactor = FMath::Clamp(SurfaceFriction * 1.5f, 1.f, 5.f);
                 FVector BrakingForce = ForwardVector * InputX * BrakeForce * ForceScale * BrakingFactor;
 
-                FString DebugBrake = FString::Printf(TEXT("Braking Force: %.1f"), BrakingForce.Size());
-                GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, DebugBrake);
                 CarSkeletalMesh->AddForce(BrakingForce);
             }
 
         }
-
-        FString FrictionText = FString::Printf(TEXT("Surface Friction: %.2f"), SurfaceFriction);
-        GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FrictionText);
-
         
         if (FMath::Abs(SteerInput) > 0.01f)
         {
@@ -207,12 +197,12 @@ void ARacingCar::Throttle(const FInputActionValue& Value)
                 EngineSound->Stop();
             }
         }
-        FString DebugText = FString::Printf(TEXT("Previous: %.2f | Current: %.2f"), PreviousThrottleValue, Val);
-        GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan, DebugText);
 
-        if (PreviousThrottleValue <= 0.0f && Val > 0.0f && ThrottleParticles)
+
+        if (Val > 0.0f && !bParticlesActive && ThrottleParticles)
         {
             ThrottleParticles->Activate(true);
+            bParticlesActive = true;
         }
 
         PreviousThrottleValue = Val;
@@ -222,9 +212,15 @@ void ARacingCar::Throttle(const FInputActionValue& Value)
 void ARacingCar::ThrottleCompleted(const FInputActionValue& Value)
 {
     ThrottleInput.X = 0.f;
-    if (EngineSound->IsPlaying())
+    if (EngineSound && EngineSound->IsPlaying())
     {
         EngineSound->Stop();
+    }
+
+    if (ThrottleParticles && bParticlesActive)
+    {
+        ThrottleParticles->Deactivate();
+        bParticlesActive = false;
     }
 }
 
